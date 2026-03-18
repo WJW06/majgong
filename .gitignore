@@ -1,0 +1,77 @@
+# ============
+# Frontend (React + Vite)
+# ============
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/.vite/
+
+# ============
+# Backend (Spring Boot)
+# ============
+backend/target/
+backend/.mvn/
+backend/*.jar
+backend/*.war
+backend/mvnw
+backend/mvnw.cmd
+
+# 환경변수 및 설정 파일
+backend/src/main/resources/application.yml
+backend/src/main/resources/application-local.yml
+backend/src/main/resources/application-prod.yml
+
+# ============
+# IDE
+# ============
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# ============
+# OS
+# ============
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# ============
+# 로그
+# ============
+*.log
+logs/
+spring.log
+
+# ============
+# 기타
+# ============
+*.class
+*.tmp
+*.bak
+*.swp
