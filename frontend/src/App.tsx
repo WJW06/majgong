@@ -5,7 +5,7 @@ import QuizSetting from './pages/QuizSetting';
 import QuizPlay from './pages/QuizPlay';
 import Ranking from './pages/Ranking';
 
-function App() {
+function App(): JSX.Element {
   return (
     <BrowserRouter>
       <Routes>

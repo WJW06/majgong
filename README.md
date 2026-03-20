@@ -16,8 +16,9 @@
 | 기술 | 역할 |
 |------|------|
 | React + Vite | UI 개발 및 빌드 |
+| TypeScript (.tsx / .ts) | 정적 타입 검사 |
 | React Router v6 | 페이지 라우팅 |
-| Tailwind CSS | 스타일링 |
+| CSSProperties StyleSheet 패턴 | 컴포넌트 하단 `styles` 객체로 스타일 관리 (React Native StyleSheet 방식) |
 | Zustand | 전역 상태 관리 (로그인 상태, 유저 정보 등) |
 | React Query (TanStack Query) | API 데이터 fetching 및 캐싱 |
 
@@ -50,14 +51,15 @@ majgong/
 ├── frontend/               # React + Vite
 │   ├── src/
 │   │   ├── pages/
-│   │   │   ├── LoginPage.jsx
-│   │   │   ├── MainPage.jsx
-│   │   │   ├── QuizSettingPage.jsx
-│   │   │   ├── QuizPage.jsx
-│   │   │   └── RankingPage.jsx
-│   │   ├── components/
-│   │   ├── store/          # Zustand 전역 상태
-│   │   └── api/            # React Query API 호출
+│   │   │   ├── Login.tsx
+│   │   │   ├── Main.tsx
+│   │   │   ├── QuizSetting.tsx
+│   │   │   ├── QuizPlay.tsx
+│   │   │   └── Ranking.tsx
+│   │   ├── components/     # 재사용 컴포넌트 (.tsx)
+│   │   ├── store/          # Zustand 전역 상태 (.ts)
+│   │   ├── api/            # React Query API 호출 (.ts)
+│   │   └── hooks/          # 커스텀 훅 (.ts)
 │   └── ...
 │
 └── backend/                # Spring Boot
