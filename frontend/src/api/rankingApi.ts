@@ -29,7 +29,7 @@ const MOCK_RANKING: RankingEntry[] = [
   { rank: 7,  userId: 7,  name: '김민수', grade: '중급',    totalScore:  170 },
   { rank: 8,  userId: 8,  name: '송지민', grade: '초급',    totalScore:   50 },
   { rank: 9,  userId: 9,  name: '한지원', grade: '입문',    totalScore:   20 },
-  { rank: 10, userId: 10, name: '우엉이', grade: '입문',    totalScore:    0 },
+  { rank: 10, userId: 10, name: '연근이', grade: '입문',    totalScore:    0 },
 ];
 
 // ── API 함수 ───────────────────────────────────────────
