@@ -6,12 +6,14 @@ import Main from './pages/Main';
 import QuizSetting from './pages/QuizSetting';
 import QuizPlay from './pages/QuizPlay';
 import Ranking from './pages/Ranking';
+import OAuth2Callback from './pages/OAuth2Callback';
 
 function App(): React.ReactElement {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/oauth2/callback" element={<OAuth2Callback />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/main" element={<Main />} />

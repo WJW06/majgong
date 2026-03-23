@@ -73,7 +73,7 @@ const ACTIONS: Action[] = [
     label: '문의하기',
     desc: '오류·건의 사항 접수',
     emoji: '💬',
-    href: 'mailto:majgong@gmail.com',
+    href: 'mailto:majgong2026@gmail.com',
     primary: false,
   },
 ];

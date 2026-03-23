@@ -59,7 +59,7 @@ export default function Register(): React.ReactElement {
     try {
       await registerApi({ name, email, password });
       setSuccess('회원가입이 완료됐습니다! 로그인 페이지로 이동합니다.');
-      setTimeout(() => navigate('/login'), 1500);
+      setTimeout(() => navigate('/login'), 1000);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
