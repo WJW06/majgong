@@ -1,4 +1,4 @@
-import { useState, CSSProperties } from 'react';
+import React, { useState, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRanking } from '../api/rankingApi';
 import useAuthStore from '../store/useAuthStore';
@@ -18,7 +18,7 @@ const GRADE_META: Record<string, { color: string; emoji: string }> = {
 const MEDAL = ['🥇', '🥈', '🥉'];
 
 // ── 컴포넌트 ────────────────────────────────────────────
-export default function Ranking(): JSX.Element {
+export default function Ranking(): React.ReactElement {
   const navigate = useNavigate();
   const me = useAuthStore((s) => s.user);
   const [search, setSearch] = useState('');

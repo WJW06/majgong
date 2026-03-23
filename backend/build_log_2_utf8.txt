@@ -1,0 +1,66 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------------< com.majgong:backend >-------------------------
+[INFO] Building demo 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ backend ---
+[INFO] Deleting C:\Users\PC\Desktop\Capstone Design2\majgong\backend\target
+[INFO] 
+[INFO] --- resources:3.2.0:resources (default-resources) @ backend ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Using 'UTF-8' encoding to copy filtered properties files.
+[INFO] Copying 2 resources
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- compiler:3.10.1:compile (default-compile) @ backend ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 15 source files to C:\Users\PC\Desktop\Capstone Design2\majgong\backend\target\classes
+mvn : WARNING: A termin
+ally deprecated method 
+in sun.misc.Unsafe has 
+been called
+위치 줄:1 문자:52
++ ... iles\Zulu\zulu-25
+\"; mvn clean compile >
+ build_log_2.txt 2>&1; 
+Get-Co ...
++                      
+    ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (WARNING: A te   
+ rm...has been call    
+ed:String) [], Rem    o
+teException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+WARNING: sun.misc.Unsaf
+e::objectFieldOffset ha
+s been called by lombok
+.permit.Permit
+WARNING: Please conside
+r reporting this to the
+ maintainers of class l
+ombok.permit.Permit
+WARNING: sun.misc.Unsaf
+e::objectFieldOffset wi
+ll be removed in a futu
+re release
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.706 s
+[INFO] Finished at: 2026-03-23T10:31:59+09:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.10.1:compile (default-compile) on project backend: Fatal error compiling: java.lang.ExceptionInInitializerError: com.sun.tools.javac.code.TypeTag :: UNKNOWN -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

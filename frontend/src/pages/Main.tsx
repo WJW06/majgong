@@ -1,3 +1,4 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMe } from '../api/userApi';
 import useAuthStore from '../store/useAuthStore';
@@ -42,7 +43,7 @@ function getGrade(score: number): Grade {
 
 // 다음 등급까지의 진행도 계산
 function getProgress(score: number): number {
-  const idx = GRADES.findLastIndex((g) => score >= g.min);
+  const idx = GRADES.findLastIndex((g: Grade) => score >= g.min);
   const next = GRADES[idx + 1];
   if (!next) return 100;
   const cur = GRADES[idx];
@@ -77,7 +78,7 @@ const ACTIONS: Action[] = [
   },
 ];
 
-export default function Main(): JSX.Element {
+export default function Main(): React.ReactElement {
   const navigate = useNavigate();
   const { user, clearAuth } = useAuthStore();
   const { data: me, isLoading, isError, error, refetch } = useMe();

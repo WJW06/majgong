@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, CSSProperties } from 'react';
+import React, { useState, useEffect, useCallback, CSSProperties } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { submitScore } from '../api/quizApi';
@@ -28,7 +28,7 @@ function calcScore(type: 'PRACTICE' | 'EXAM', total: number, correct: number): n
 }
 
 // ── 컴포넌트 ────────────────────────────────────────────
-export default function QuizPlay(): JSX.Element {
+export default function QuizPlay(): React.ReactElement {
   const navigate   = useNavigate();
   const location   = useLocation();
   const state      = location.state as LocationState | null;

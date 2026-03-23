@@ -1,4 +1,4 @@
-import { useState, CSSProperties } from 'react';
+import React, { useState, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { useSubjects, useRanges, startQuiz } from '../api/quizApi';
@@ -37,7 +37,7 @@ const COUNT_OPTIONS: CountOption[] = [
 
 // ── 컴포넌트 ────────────────────────────────────────────
 
-export default function QuizSetting(): JSX.Element {
+export default function QuizSetting(): React.ReactElement {
   const navigate = useNavigate();
   const token = useAuthStore((s) => s.token);
 

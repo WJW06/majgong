@@ -19,9 +19,9 @@ public class AuthService {
     private final JwtProvider jwtProvider;
 
     @Transactional
-    public void register(AuthDto.RegisterRequest request) {
+    public AuthDto.RegisterResponse register(AuthDto.RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
 
         User user = User.builder()
@@ -29,29 +29,40 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
                 .loginType(LoginType.LOCAL)
-                .grade("UNRANKED") // Default grade
+                .grade("UNRANKED")
                 .totalScore(0)
                 .role("ROLE_USER")
                 .build();
 
         userRepository.save(user);
+
+        return AuthDto.RegisterResponse.builder()
+                .message("회원가입이 완료되었습니다.")
+                .build();
     }
 
     @Transactional(readOnly = true)
-    public AuthDto.TokenResponse login(AuthDto.LoginRequest request) {
+    public AuthDto.LoginResponse login(AuthDto.LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+                .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
 
         String token = jwtProvider.generateToken(user.getEmail());
 
-        return AuthDto.TokenResponse.builder()
-                .accessToken(token)
-                .email(user.getEmail())
+        AuthDto.UserInfo userInfo = AuthDto.UserInfo.builder()
+                .id(user.getId())
                 .name(user.getName())
+                .email(user.getEmail())
+                .grade(user.getGrade())
+                .totalScore(user.getTotalScore())
+                .build();
+
+        return AuthDto.LoginResponse.builder()
+                .token(token)
+                .user(userInfo)
                 .build();
     }
 }
