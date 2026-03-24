@@ -5,7 +5,7 @@ import useAuthStore from '../store/useAuthStore';
 const API_BASE = '/api/v1';
 
 /** true이면 백엔드 대신 mock 데이터를 사용 (백엔드 완성 후 false로 변경) */
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 // ── 타입 정의 ──────────────────────────────────────────
 
@@ -35,7 +35,7 @@ export interface QuizProblem {
   id: number;
   question: string;
   options: string[];
-  answer?: number; // 연습문제에서만 제공될 수 있음
+  answer?: string; // 연습문제에서만 제공될 수 있음
 }
 
 export interface QuizStartResponse {
@@ -95,6 +95,12 @@ export const fetchRanges = (token: string | null, subjectId: number): Promise<Pr
   return authFetch<ProblemRange[]>(`${API_BASE}/problems/ranges?subject=${subjectId}`, token);
 };
 
+/** 문제 수 조회 */
+export const fetchProblemCount = (token: string | null, rangeId: number, difficulty: string): Promise<number> => {
+  if (USE_MOCK) return Promise.resolve(15); // Mock 값
+  return authFetch<number>(`${API_BASE}/problems/count?rangeId=${rangeId}&difficulty=${difficulty}`, token);
+};
+
 /** 퀴즈 시작 (문제 목록 반환) */
 export const startQuiz = (token: string | null, body: QuizStartRequest) =>
   authFetch<QuizStartResponse>(`${API_BASE}/problems/quiz`, token, {
@@ -152,5 +158,16 @@ export const useRanges = (subjectId: number | null): UseQueryResult<ProblemRange
     queryFn: () => fetchRanges(token, subjectId!),
     enabled: (USE_MOCK || !!token) && subjectId !== null, // mock 모드에서는 토큰 불필요
     staleTime: 1000 * 60 * 10,
+  });
+};
+
+/** 문제 수 조회 훅 */
+export const useProblemCount = (rangeId: number | null, difficulty: string): UseQueryResult<number, Error> => {
+  const token = useAuthStore((s) => s.token);
+  return useQuery<number, Error>({
+    queryKey: ['problemCount', rangeId, difficulty],
+    queryFn: () => fetchProblemCount(token, rangeId!, difficulty),
+    enabled: !!token && rangeId !== null,
+    staleTime: 1000 * 60 * 5, // 5분 캐싱
   });
 };

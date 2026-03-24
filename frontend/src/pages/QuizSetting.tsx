@@ -1,7 +1,7 @@
 import React, { useState, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import { useSubjects, useRanges, startQuiz } from '../api/quizApi';
+import { useSubjects, useRanges, useProblemCount, startQuiz } from '../api/quizApi';
 import type { QuizStartRequest, QuizStartResponse } from '../api/quizApi';
 import useAuthStore from '../store/useAuthStore';
 
@@ -51,6 +51,7 @@ export default function QuizSetting(): React.ReactElement {
   // ── API 훅
   const { data: subjects, isLoading: subjectsLoading, isError: subjectsError } = useSubjects();
   const { data: ranges,   isLoading: rangesLoading }                           = useRanges(selectedSubjectId);
+  const { data: availableCount, isLoading: countLoading }                      = useProblemCount(selectedRangeId, difficulty);
 
   // ── 퀴즈 시작 mutation
   const { mutate: submitQuiz, isPending, error: submitError } = useMutation<
@@ -60,12 +61,17 @@ export default function QuizSetting(): React.ReactElement {
   >({
     mutationFn: (body) => startQuiz(token, body),
     onSuccess: (data) => {
+      if (data.problems.length === 0) {
+        alert('선택한 조건에 해당하는 문제가 없습니다. 다른 설정을 선택해 주세요.');
+        return;
+      }
       // 문제 풀기 페이지로 이동, 문제 데이터 state로 전달
       navigate('/quiz/play', { state: { quizData: data, quizType, count } });
     },
   });
 
-  const isReady = selectedSubjectId !== null && selectedRangeId !== null;
+  const isInsufficient = availableCount !== undefined && availableCount < count;
+  const isReady = selectedSubjectId !== null && selectedRangeId !== null && !isInsufficient;
 
   const handleStart = () => {
     if (!isReady) return;
@@ -201,6 +207,11 @@ export default function QuizSetting(): React.ReactElement {
                 );
               })}
             </div>
+            {selectedRangeId !== null && (
+              <p style={{ ...styles.infoText, marginTop: '0.4rem' }}>
+                💡 현재 조건의 문제: {availableCount ?? 0}개
+              </p>
+            )}
           </section>
 
           <div style={styles.divider} />
@@ -254,6 +265,13 @@ export default function QuizSetting(): React.ReactElement {
           {/* 에러 메시지 */}
           {submitError && (
             <p style={styles.errorText}>⚠️ {submitError.message}</p>
+          )}
+
+          {/* 문제 부족 경고 */}
+          {isInsufficient && !countLoading && (
+            <p style={styles.errorText}>
+              ⚠️ 해당 조건의 문제가 부족합니다. (보유: {availableCount ?? 0}개)
+            </p>
           )}
 
           {/* 시작 버튼 */}
@@ -458,6 +476,11 @@ const styles: Record<string, CSSProperties> = {
     fontSize: '1.1rem',
     fontWeight: '800',
     color: '#818cf8',
+  },
+  infoText: {
+    fontSize: '0.8rem',
+    color: '#94a3b8',
+    margin: 0,
   },
   errorText: {
     fontSize: '0.85rem',

@@ -21,8 +21,7 @@ interface LocationState {
 type AnswerState = 'idle' | 'correct' | 'wrong';
 
 // ── 점수 계산 ───────────────────────────────────────────
-function calcScore(type: 'PRACTICE' | 'EXAM', total: number, correct: number): number {
-  const wrong = total - correct;
+function calcScore(type: 'PRACTICE' | 'EXAM', total: number, correct: number, wrong: number): number {
   if (type === 'PRACTICE') return correct * 1;
   return Math.max(0, total * 5 - wrong);
 }
@@ -50,6 +49,7 @@ export default function QuizPlay(): React.ReactElement {
   const [selectedOpt,   setSelectedOpt]   = useState<number | null>(null);
   const [answerState,   setAnswerState]   = useState<AnswerState>('idle');
   const [correctCount,  setCorrectCount]  = useState(0);
+  const [wrongCount,    setWrongCount]    = useState(0);
   const [elapsed,       setElapsed]       = useState(0); // 초 단위
   const [isFinished,    setIsFinished]    = useState(false);
   const [userAnswers,   setUserAnswers]   = useState<(number | null)[]>(
@@ -80,15 +80,15 @@ export default function QuizPlay(): React.ReactElement {
 
   // ── 퀴즈 종료 처리
   const finishQuiz = useCallback(
-    (finalCorrect: number) => {
+    (finalCorrect: number, finalWrong: number) => {
       setIsFinished(true);
-      const score = calcScore(quizType, problems.length, finalCorrect);
+      const score = calcScore(quizType, problems.length, finalCorrect, finalWrong);
       sendScore({
         quizId: quizData.quizId,
         type: quizType,
         totalCount: problems.length,
         correctCount: finalCorrect,
-        wrongCount: problems.length - finalCorrect,
+        wrongCount: finalWrong,
         score,
       });
     },
@@ -107,26 +107,34 @@ export default function QuizPlay(): React.ReactElement {
 
     // 연습문제: 즉시 정답 피드백 표시
     if (quizType === 'PRACTICE' && problem.answer !== undefined) {
-      const isCorrect = optIdx === problem.answer;
+      const isCorrect = problem.options[optIdx] === problem.answer;
       setAnswerState(isCorrect ? 'correct' : 'wrong');
-      if (isCorrect) setCorrectCount((c) => c + 1);
-
-      // 1.2초 후 다음 문제로 이동
-      setTimeout(() => nextQuestion(newAnswers, isCorrect ? correctCount + 1 : correctCount), 1200);
+      if (isCorrect) {
+        setCorrectCount((c) => c + 1);
+        setTimeout(() => nextQuestion(newAnswers, correctCount + 1, wrongCount), 1200);
+      } else {
+        setWrongCount((c) => c + 1);
+        setTimeout(() => nextQuestion(newAnswers, correctCount, wrongCount + 1), 1200);
+      }
     } else {
       // 실전문제: 피드백 없이 바로 다음으로
-      const isCorrect = problem.answer !== undefined && optIdx === problem.answer;
+      const isCorrect = problem.answer !== undefined && problem.options[optIdx] === problem.answer;
       const newCorrect = isCorrect ? correctCount + 1 : correctCount;
+      const newWrong = !isCorrect ? wrongCount + 1 : wrongCount;
+      
+      setAnswerState(isCorrect ? 'correct' : 'wrong'); // 블로킹을 위해 상태 변경
+      
       if (isCorrect) setCorrectCount(newCorrect);
-      setTimeout(() => nextQuestion(newAnswers, newCorrect), 400);
+      else setWrongCount(newWrong);
+      setTimeout(() => nextQuestion(newAnswers, newCorrect, newWrong), 500);
     }
   };
 
-  const nextQuestion = (_answers: (number | null)[], curCorrect: number) => {
+  const nextQuestion = (_answers: (number | null)[], curCorrect: number, curWrong: number) => {
     setSelectedOpt(null);
     setAnswerState('idle');
     if (currentIdx + 1 >= problems.length) {
-      finishQuiz(curCorrect);
+      finishQuiz(curCorrect, curWrong);
     } else {
       setCurrentIdx((i) => i + 1);
     }
@@ -135,8 +143,7 @@ export default function QuizPlay(): React.ReactElement {
   // ── 결과 화면 ────────────────────────────────────────
   if (isFinished) {
     const totalCount  = problems.length;
-    const wrongCount  = totalCount - correctCount;
-    const score       = calcScore(quizType, totalCount, correctCount);
+    const score       = calcScore(quizType, totalCount, correctCount, wrongCount);
     const accuracy    = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
 
     return (
@@ -203,9 +210,22 @@ export default function QuizPlay(): React.ReactElement {
 
   // ── 문제 풀기 화면 ───────────────────────────────────
   const problem  = problems[currentIdx];
-  const progress = ((currentIdx) / problems.length) * 100;
+  const progress = problems.length > 0 ? ((currentIdx) / problems.length) * 100 : 0;
 
-  if (!problem) return <div />;
+  if (!problem) {
+    return (
+      <div style={styles.page}>
+        <div style={styles.container}>
+          <div style={styles.questionCard}>
+            <p style={styles.questionText}>문제를 불러오지 못했거나 문제가 없습니다.</p>
+          </div>
+          <button style={styles.btnPrimary} onClick={() => navigate('/quiz/setting')}>
+            설정으로 돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.page}>
@@ -244,11 +264,16 @@ export default function QuizPlay(): React.ReactElement {
             let color  = '#e0e7ff';
 
             if (selectedOpt === idx) {
-              if (answerState === 'correct') {
-                border = '#34d399'; bg = '#34d39922'; color = '#34d399';
-              } else if (answerState === 'wrong') {
-                border = '#f87171'; bg = '#f8717122'; color = '#f87171';
+              if (quizType === 'PRACTICE') {
+                if (answerState === 'correct') {
+                  border = '#34d399'; bg = '#34d39922'; color = '#34d399';
+                } else if (answerState === 'wrong') {
+                  border = '#f87171'; bg = '#f8717122'; color = '#f87171';
+                } else {
+                  border = '#a78bfa'; bg = '#a78bfa22'; color = '#a78bfa';
+                }
               } else {
+                // 실전문제(EXAM)는 정답 피드백 없이 선택 강조(보라색)만 유지
                 border = '#a78bfa'; bg = '#a78bfa22'; color = '#a78bfa';
               }
             }
@@ -257,7 +282,7 @@ export default function QuizPlay(): React.ReactElement {
               quizType === 'PRACTICE' &&
               answerState === 'wrong' &&
               problem.answer !== undefined &&
-              idx === problem.answer
+              problem.options[idx] === problem.answer
             ) {
               border = '#34d399'; bg = '#34d39911'; color = '#34d399';
             }
@@ -296,10 +321,10 @@ export default function QuizPlay(): React.ReactElement {
         <div style={styles.scoreBar}>
           <span style={{ color: '#34d399' }}>✔ {correctCount}정답</span>
           <span style={{ color: '#f87171' }}>
-            ✖ {currentIdx - correctCount + (answerState !== 'idle' ? 0 : 0)}오답
+            ✖ {wrongCount}오답
           </span>
           <span style={{ color: '#64748b' }}>
-            예상 점수: {calcScore(quizType, problems.length, correctCount)}점
+            예상 점수: {calcScore(quizType, problems.length, correctCount, wrongCount)}점
           </span>
         </div>
 
