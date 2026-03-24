@@ -17,4 +17,5 @@ public class QuizStartRequest {
     private Difficulty difficulty;
     private int count;
     private QuizType type;
+    private com.majgong.backend.entity.ProblemFormat format;
 }

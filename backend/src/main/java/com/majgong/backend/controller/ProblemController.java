@@ -36,7 +36,8 @@ public class ProblemController {
 
     @GetMapping("/count")
     public ResponseEntity<Long> getCount(@RequestParam("rangeId") Long rangeId, 
-                                         @RequestParam("difficulty") Difficulty difficulty) {
-        return ResponseEntity.ok(quizService.getProblemCount(rangeId, difficulty));
+                                         @RequestParam("difficulty") Difficulty difficulty,
+                                         @RequestParam("format") com.majgong.backend.entity.ProblemFormat format) {
+        return ResponseEntity.ok(quizService.getProblemCount(rangeId, difficulty, format));
     }
 }

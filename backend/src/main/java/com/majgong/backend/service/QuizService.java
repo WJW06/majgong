@@ -39,9 +39,10 @@ public class QuizService {
     }
 
     public QuizStartResponse generateQuiz(QuizStartRequest request) {
-        List<Problem> problems = problemRepository.findByProblemRangeIdAndDifficulty(
+        List<Problem> problems = problemRepository.findByProblemRangeIdAndDifficultyAndFormat(
                 request.getRangeId(),
-                request.getDifficulty()
+                request.getDifficulty(),
+                request.getFormat()
         );
         Collections.shuffle(problems);
         if (problems.size() > request.getCount()) {
@@ -56,7 +57,7 @@ public class QuizService {
             // String answer = request.getType() == QuizType.PRACTICE ? p.getAnswer() : null;
             String answer = p.getAnswer();
 
-            return new QuizProblemDto(p.getId(), p.getQuestion(), options, answer);
+            return new QuizProblemDto(p.getId(), p.getQuestion(), options, answer, p.getFormat(), p.getImageUrl());
         }).collect(Collectors.toList());
 
         // For simplicity, we use the timestamp or a random value as a pseudo quiz ID since we don't persist quiz sessions yet.
@@ -65,7 +66,7 @@ public class QuizService {
         return new QuizStartResponse(pseudoQuizId, problemDtos);
     }
 
-    public long getProblemCount(Long rangeId, Difficulty difficulty) {
-        return problemRepository.countByProblemRangeIdAndDifficulty(rangeId, difficulty);
+    public long getProblemCount(Long rangeId, Difficulty difficulty, com.majgong.backend.entity.ProblemFormat format) {
+        return problemRepository.countByProblemRangeIdAndDifficultyAndFormat(rangeId, difficulty, format);
     }
 }

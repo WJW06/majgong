@@ -47,11 +47,12 @@ export default function QuizSetting(): React.ReactElement {
   const [difficulty,        setDifficulty]         = useState<Difficulty>('MEDIUM');
   const [count,             setCount]             = useState<number>(10);
   const [quizType,          setQuizType]          = useState<QuizType>('PRACTICE');
+  const [format,            setFormat]            = useState<'MULTIPLE_CHOICE' | 'SHORT_ANSWER'>('MULTIPLE_CHOICE');
 
   // ── API 훅
   const { data: subjects, isLoading: subjectsLoading, isError: subjectsError } = useSubjects();
   const { data: ranges,   isLoading: rangesLoading }                           = useRanges(selectedSubjectId);
-  const { data: availableCount, isLoading: countLoading }                      = useProblemCount(selectedRangeId, difficulty);
+  const { data: availableCount, isLoading: countLoading }                      = useProblemCount(selectedRangeId, difficulty, format);
 
   // ── 퀴즈 시작 mutation
   const { mutate: submitQuiz, isPending, error: submitError } = useMutation<
@@ -81,6 +82,7 @@ export default function QuizSetting(): React.ReactElement {
       difficulty,
       count,
       type: quizType,
+      format,
     });
   };
 
@@ -185,7 +187,45 @@ export default function QuizSetting(): React.ReactElement {
             </div>
           </section>
 
-          {/* ④ 문제 수 선택 */}
+          <div style={styles.divider} />
+
+          {/* ④ 문제 형식 선택 */}
+          <section style={styles.section}>
+            <label style={styles.label}>문제 형식</label>
+            <div style={styles.typeGroup}>
+              <button
+                style={{
+                  ...styles.typeCard,
+                  borderColor: format === 'MULTIPLE_CHOICE' ? '#a78bfa' : 'rgba(255,255,255,0.08)',
+                  background:  format === 'MULTIPLE_CHOICE' ? '#a78bfa11' : 'rgba(255,255,255,0.03)',
+                }}
+                onClick={() => setFormat('MULTIPLE_CHOICE')}
+              >
+                <span style={{ ...styles.typeTitle, color: format === 'MULTIPLE_CHOICE' ? '#a78bfa' : '#e0e7ff', marginTop: '0.5rem' }}>
+                  객관식
+                </span>
+                <span style={styles.typeDesc}>선택지 중 하나 고르기</span>
+              </button>
+
+              <button
+                style={{
+                  ...styles.typeCard,
+                  borderColor: format === 'SHORT_ANSWER' ? '#a78bfa' : 'rgba(255,255,255,0.08)',
+                  background:  format === 'SHORT_ANSWER' ? '#a78bfa11' : 'rgba(255,255,255,0.03)',
+                }}
+                onClick={() => setFormat('SHORT_ANSWER')}
+              >
+                <span style={{ ...styles.typeTitle, color: format === 'SHORT_ANSWER' ? '#a78bfa' : '#e0e7ff', marginTop: '0.5rem' }}>
+                  주관식
+                </span>
+                <span style={styles.typeDesc}>직접 정답 입력하기</span>
+              </button>
+            </div>
+          </section>
+
+          <div style={styles.divider} />
+
+          {/* ⑤ 문제 수 선택 */}
           <section style={styles.section}>
             <label style={styles.label}>문제 수</label>
             <div style={styles.chipGroup}>
@@ -216,7 +256,7 @@ export default function QuizSetting(): React.ReactElement {
 
           <div style={styles.divider} />
 
-          {/* ⑤ 문제 유형 선택 */}
+          {/* ⑥ 문제 유형 선택 */}
           <section style={styles.section}>
             <label style={styles.label}>문제 유형</label>
             <div style={styles.typeGroup}>

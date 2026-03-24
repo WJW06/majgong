@@ -55,6 +55,7 @@ export default function QuizPlay(): React.ReactElement {
   const [userAnswers,   setUserAnswers]   = useState<(number | null)[]>(
     Array(problems.length).fill(null)
   );
+  const [shortAnswerText, setShortAnswerText] = useState('');
 
   // ── 타이머
   useEffect(() => {
@@ -130,9 +131,44 @@ export default function QuizPlay(): React.ReactElement {
     }
   };
 
+  const handleSubmitShortAnswer = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (answerState !== 'idle' || !shortAnswerText.trim()) return;
+
+    const problem = problems[currentIdx];
+    const newAnswers = [...userAnswers];
+    newAnswers[currentIdx] = null; 
+    setUserAnswers(newAnswers);
+
+    const isCorrect = problem.answer !== undefined && 
+        shortAnswerText.trim() === problem.answer.trim();
+
+    if (quizType === 'PRACTICE' && problem.answer !== undefined) {
+      setAnswerState(isCorrect ? 'correct' : 'wrong');
+      if (isCorrect) {
+        setCorrectCount((c) => c + 1);
+        setTimeout(() => nextQuestion(newAnswers, correctCount + 1, wrongCount), 1200);
+      } else {
+        setWrongCount((c) => c + 1);
+        setTimeout(() => nextQuestion(newAnswers, correctCount, wrongCount + 1), 1200);
+      }
+    } else {
+      const isCorrectExam = problem.answer !== undefined && shortAnswerText.trim() === problem.answer.trim();
+      const newCorrect = isCorrectExam ? correctCount + 1 : correctCount;
+      const newWrong = !isCorrectExam ? wrongCount + 1 : wrongCount;
+      
+      setAnswerState(isCorrectExam ? 'correct' : 'wrong');
+      
+      if (isCorrectExam) setCorrectCount(newCorrect);
+      else setWrongCount(newWrong);
+      setTimeout(() => nextQuestion(newAnswers, newCorrect, newWrong), 500);
+    }
+  };
+
   const nextQuestion = (_answers: (number | null)[], curCorrect: number, curWrong: number) => {
     setSelectedOpt(null);
     setAnswerState('idle');
+    setShortAnswerText('');
     if (currentIdx + 1 >= problems.length) {
       finishQuiz(curCorrect, curWrong);
     } else {
@@ -251,57 +287,90 @@ export default function QuizPlay(): React.ReactElement {
         </div>
 
         {/* 문제 카드 */}
-        <div style={styles.questionCard}>
-          <p style={styles.questionText}>{problem.question}</p>
+        <div style={{...styles.questionCard, flexDirection: 'column'}}>
+          {problem.imageUrl && (
+            <img src={problem.imageUrl} alt="문제 이미지" style={styles.problemImage} />
+          )}
+          <p style={{...styles.questionText, marginTop: problem.imageUrl ? '1rem' : 0}}>
+            {problem.question}
+          </p>
         </div>
 
-        {/* 보기 목록 */}
-        <div style={styles.optionsGrid}>
-          {problem.options.map((opt, idx) => {
-            // 색상 결정
-            let border = 'rgba(255,255,255,0.1)';
-            let bg     = 'rgba(255,255,255,0.04)';
-            let color  = '#e0e7ff';
-
-            if (selectedOpt === idx) {
-              if (quizType === 'PRACTICE') {
-                if (answerState === 'correct') {
-                  border = '#34d399'; bg = '#34d39922'; color = '#34d399';
-                } else if (answerState === 'wrong') {
-                  border = '#f87171'; bg = '#f8717122'; color = '#f87171';
+        {/* 보기 목록 또는 주관식 입력 */}
+        {problem.format === 'SHORT_ANSWER' ? (
+          <form onSubmit={handleSubmitShortAnswer} style={styles.shortAnswerForm}>
+            <input 
+              type="text" 
+              value={shortAnswerText}
+              onChange={(e) => setShortAnswerText(e.target.value)}
+              disabled={answerState !== 'idle'}
+              placeholder="정답을 입력하세요"
+              style={{
+                ...styles.shortAnswerInput,
+                borderColor: answerState === 'correct' ? '#34d399' : answerState === 'wrong' ? '#f87171' : 'rgba(255,255,255,0.2)'
+              }}
+            />
+            <button 
+              type="submit" 
+              disabled={answerState !== 'idle' || !shortAnswerText.trim()}
+              style={{
+                ...styles.shortAnswerSubmitBtn,
+                background: answerState !== 'idle' || !shortAnswerText.trim() ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
+                color: answerState !== 'idle' || !shortAnswerText.trim() ? '#94a3b8' : '#e0e7ff',
+                cursor: answerState !== 'idle' || !shortAnswerText.trim() ? 'not-allowed' : 'pointer',
+              }}
+            >
+              제출
+            </button>
+          </form>
+        ) : (
+          <div style={styles.optionsGrid}>
+            {problem.options.map((opt, idx) => {
+              // 색상 결정
+              let border = 'rgba(255,255,255,0.1)';
+              let bg     = 'rgba(255,255,255,0.04)';
+              let color  = '#e0e7ff';
+  
+              if (selectedOpt === idx) {
+                if (quizType === 'PRACTICE') {
+                  if (answerState === 'correct') {
+                    border = '#34d399'; bg = '#34d39922'; color = '#34d399';
+                  } else if (answerState === 'wrong') {
+                    border = '#f87171'; bg = '#f8717122'; color = '#f87171';
+                  } else {
+                    border = '#a78bfa'; bg = '#a78bfa22'; color = '#a78bfa';
+                  }
                 } else {
+                  // 실전문제(EXAM)는 정답 피드백 없이 선택 강조(보라색)만 유지
                   border = '#a78bfa'; bg = '#a78bfa22'; color = '#a78bfa';
                 }
-              } else {
-                // 실전문제(EXAM)는 정답 피드백 없이 선택 강조(보라색)만 유지
-                border = '#a78bfa'; bg = '#a78bfa22'; color = '#a78bfa';
               }
-            }
-            // 연습 모드에서 오답 선택 후 정답 표시
-            if (
-              quizType === 'PRACTICE' &&
-              answerState === 'wrong' &&
-              problem.answer !== undefined &&
-              problem.options[idx] === problem.answer
-            ) {
-              border = '#34d399'; bg = '#34d39911'; color = '#34d399';
-            }
-
-            return (
-              <button
-                key={idx}
-                style={{ ...styles.optionBtn, borderColor: border, background: bg, color }}
-                onClick={() => handleSelect(idx)}
-                disabled={answerState !== 'idle'}
-              >
-                <span style={styles.optionLabel}>
-                  {String.fromCharCode(65 + idx)}
-                </span>
-                <span style={styles.optionText}>{opt}</span>
-              </button>
-            );
-          })}
-        </div>
+              // 연습 모드에서 오답 선택 후 정답 표시
+              if (
+                quizType === 'PRACTICE' &&
+                answerState === 'wrong' &&
+                problem.answer !== undefined &&
+                problem.options[idx] === problem.answer
+              ) {
+                border = '#34d399'; bg = '#34d39911'; color = '#34d399';
+              }
+  
+              return (
+                <button
+                  key={idx}
+                  style={{ ...styles.optionBtn, borderColor: border, background: bg, color }}
+                  onClick={() => handleSelect(idx)}
+                  disabled={answerState !== 'idle'}
+                >
+                  <span style={styles.optionLabel}>
+                    {String.fromCharCode(65 + idx)}
+                  </span>
+                  <span style={styles.optionText}>{opt}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* 정답/오답 피드백 메시지 (연습 모드) */}
         {quizType === 'PRACTICE' && answerState !== 'idle' && (
@@ -314,6 +383,9 @@ export default function QuizPlay(): React.ReactElement {
             }}
           >
             {answerState === 'correct' ? '🎉 정답입니다!' : '❌ 오답입니다.'}
+            {answerState === 'wrong' && problem.format === 'SHORT_ANSWER' && problem.answer && (
+              <span style={{marginLeft: '8px', color: '#e0e7ff'}}>정답: {problem.answer}</span>
+            )}
           </div>
         )}
 
@@ -434,6 +506,37 @@ const styles: Record<string, CSSProperties> = {
     textAlign: 'center', padding: '0.65rem',
     borderRadius: '10px', border: '1px solid',
     fontWeight: '700', fontSize: '0.95rem',
+  },
+  shortAnswerForm: {
+    display: 'flex', gap: '8px', 
+    flexDirection: 'column',
+    width: '100%',
+  },
+  shortAnswerInput: {
+    width: '100%',
+    padding: '1.2rem',
+    borderRadius: '12px',
+    border: '2px solid rgba(255,255,255,0.2)',
+    background: 'rgba(0,0,0,0.2)',
+    color: '#e0e7ff',
+    fontSize: '1.1rem',
+    outline: 'none',
+    transition: 'border-color 0.2s',
+  },
+  shortAnswerSubmitBtn: {
+    padding: '1rem',
+    borderRadius: '12px',
+    border: 'none',
+    fontSize: '1.1rem',
+    fontWeight: 'bold',
+    transition: 'background 0.2s',
+  },
+  problemImage: {
+    width: '100%',
+    maxHeight: '300px',
+    objectFit: 'contain',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
 
   // ── 정답 현황 바

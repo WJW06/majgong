@@ -21,13 +21,13 @@ export interface ProblemRange {
   name: string; // 예: '프로세스 관리', '메모리 관리'
 }
 
-/** 퀴즈 시작 요청 body */
 export interface QuizStartRequest {
   subjectId: number;
   rangeId: number;
   difficulty: 'HIGH' | 'MEDIUM' | 'LOW';
   count: number;
   type: 'PRACTICE' | 'EXAM'; // 연습문제 | 실전문제
+  format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER'; // 오류/주관식
 }
 
 /** 퀴즈 시작 응답 - 실제 문제 목록 */
@@ -36,6 +36,8 @@ export interface QuizProblem {
   question: string;
   options: string[];
   answer?: string; // 연습문제에서만 제공될 수 있음
+  format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER';
+  imageUrl?: string | null;
 }
 
 export interface QuizStartResponse {
@@ -96,9 +98,9 @@ export const fetchRanges = (token: string | null, subjectId: number): Promise<Pr
 };
 
 /** 문제 수 조회 */
-export const fetchProblemCount = (token: string | null, rangeId: number, difficulty: string): Promise<number> => {
+export const fetchProblemCount = (token: string | null, rangeId: number, difficulty: string, format: string): Promise<number> => {
   if (USE_MOCK) return Promise.resolve(15); // Mock 값
-  return authFetch<number>(`${API_BASE}/problems/count?rangeId=${rangeId}&difficulty=${difficulty}`, token);
+  return authFetch<number>(`${API_BASE}/problems/count?rangeId=${rangeId}&difficulty=${difficulty}&format=${format}`, token);
 };
 
 /** 퀴즈 시작 (문제 목록 반환) */
@@ -162,11 +164,11 @@ export const useRanges = (subjectId: number | null): UseQueryResult<ProblemRange
 };
 
 /** 문제 수 조회 훅 */
-export const useProblemCount = (rangeId: number | null, difficulty: string): UseQueryResult<number, Error> => {
+export const useProblemCount = (rangeId: number | null, difficulty: string, format: string): UseQueryResult<number, Error> => {
   const token = useAuthStore((s) => s.token);
   return useQuery<number, Error>({
-    queryKey: ['problemCount', rangeId, difficulty],
-    queryFn: () => fetchProblemCount(token, rangeId!, difficulty),
+    queryKey: ['problemCount', rangeId, difficulty, format],
+    queryFn: () => fetchProblemCount(token, rangeId!, difficulty, format),
     enabled: !!token && rangeId !== null,
     staleTime: 1000 * 60 * 5, // 5분 캐싱
   });

@@ -26,6 +26,13 @@ public class Problem {
     @Column(nullable = false)
     private Difficulty difficulty;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProblemFormat format = ProblemFormat.MULTIPLE_CHOICE;
+
+    @Column(length = 2000)
+    private String imageUrl;
+
     @Column(nullable = false)
     private String answer; // 0-indexed correct option index
 
