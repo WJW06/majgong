@@ -479,7 +479,11 @@ const styles: Record<string, CSSProperties> = {
   },
 
   // ── 보기
-  optionsGrid: { display: 'flex', flexDirection: 'column', gap: '0.65rem' },
+  optionsGrid: { 
+    display: 'grid', 
+    gridTemplateColumns: '1fr 1fr', 
+    gap: '0.75rem' 
+  },
   optionBtn: {
     display: 'flex', alignItems: 'center', gap: '0.9rem',
     padding: '0.85rem 1.1rem',

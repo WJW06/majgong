@@ -30,7 +30,7 @@ export default function ProblemCreate(): React.ReactElement {
   const [imageUrl, setImageUrl] = useState('');
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
-  const [options, setOptions] = useState<string[]>(['', '', '', '']);
+  const [options, setOptions] = useState<string[]>(['', '', '', '', '']);
 
   // ── API 훅
   const { data: subjects, isLoading: subjectsLoading } = useSubjects();
@@ -156,19 +156,19 @@ export default function ProblemCreate(): React.ReactElement {
               <div style={styles.chipGroup}>
                 <button
                   type="button"
-                  style={{ ...styles.chip, ...(difficulty === 'HIGH' ? styles.chipActive : {}) }}
-                  onClick={() => setDifficulty('HIGH')}
-                >상</button>
+                  style={{ ...styles.chip, ...(difficulty === 'LOW' ? styles.chipActive : {}) }}
+                  onClick={() => setDifficulty('LOW')}
+                >🌱 하</button>
                 <button
                   type="button"
                   style={{ ...styles.chip, ...(difficulty === 'MEDIUM' ? styles.chipActive : {}) }}
                   onClick={() => setDifficulty('MEDIUM')}
-                >중</button>
+                >📘 중</button>
                 <button
                   type="button"
-                  style={{ ...styles.chip, ...(difficulty === 'LOW' ? styles.chipActive : {}) }}
-                  onClick={() => setDifficulty('LOW')}
-                >하</button>
+                  style={{ ...styles.chip, ...(difficulty === 'HIGH' ? styles.chipActive : {}) }}
+                  onClick={() => setDifficulty('HIGH')}
+                >🔥 상</button>
               </div>
             </div>
           </div>
@@ -201,7 +201,7 @@ export default function ProblemCreate(): React.ReactElement {
           {/* 객관식 보기 입력 */}
           {format === 'MULTIPLE_CHOICE' && (
             <section style={styles.sectionColumn}>
-              <label style={styles.label}>보기 입력 (4개)</label>
+              <label style={styles.label}>보기 입력 (5개)</label>
               <div style={styles.optionsGrid}>
                 {options.map((opt, idx) => (
                   <input
