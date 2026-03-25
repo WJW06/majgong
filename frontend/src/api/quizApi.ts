@@ -30,6 +30,17 @@ export interface QuizStartRequest {
   format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER'; // 오류/주관식
 }
 
+export interface ProblemCreateRequest {
+  subjectId: number;
+  rangeId: number;
+  format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER';
+  difficulty: 'HIGH' | 'MEDIUM' | 'LOW';
+  imageUrl?: string | null;
+  question: string;
+  answer: string;
+  options?: string[];
+}
+
 /** 퀴즈 시작 응답 - 실제 문제 목록 */
 export interface QuizProblem {
   id: number;
@@ -171,5 +182,13 @@ export const useProblemCount = (rangeId: number | null, difficulty: string, form
     queryFn: () => fetchProblemCount(token, rangeId!, difficulty, format),
     enabled: !!token && rangeId !== null,
     staleTime: 1000 * 60 * 5, // 5분 캐싱
+  });
+};
+
+/** 문제 생성 */
+export const createProblem = (token: string | null, data: ProblemCreateRequest): Promise<void> => {
+  return authFetch<void>(`${API_BASE}/problems/create`, token, {
+    method: 'POST',
+    body: JSON.stringify(data),
   });
 };

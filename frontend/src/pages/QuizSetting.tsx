@@ -114,114 +114,116 @@ export default function QuizSetting(): React.ReactElement {
         {/* 카드 영역 */}
         <div style={styles.card}>
 
-          {/* ① 과목 선택 */}
-          <section style={styles.section}>
-            <label style={styles.label}>과목 선택</label>
-            {subjectsLoading ? (
-              <div style={styles.skeletonSelect} />
-            ) : subjectsError ? (
-              <p style={styles.errorText}>⚠️ 과목 목록을 불러오지 못했습니다.</p>
-            ) : (
-              <select
-                style={styles.select}
-                value={selectedSubjectId ?? ''}
-                onChange={(e) => handleSubjectChange(Number(e.target.value))}
-              >
-                <option value="" disabled>과목을 선택하세요</option>
-                {subjects?.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
-            )}
-          </section>
+          <div style={styles.sectionRow}>
+            {/* ① 과목 선택 */}
+            <section style={{ ...styles.section, flex: 1 }}>
+              <label style={styles.label}>과목</label>
+              {subjectsLoading ? (
+                <div style={styles.skeletonSelect} />
+              ) : subjectsError ? (
+                <p style={styles.errorText}>⚠️ 에러</p>
+              ) : (
+                <select
+                  style={styles.select}
+                  value={selectedSubjectId ?? ''}
+                  onChange={(e) => handleSubjectChange(Number(e.target.value))}
+                >
+                  <option value="" disabled>과목 선택</option>
+                  {subjects?.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              )}
+            </section>
 
-          {/* ② 범위 선택 */}
-          <section style={styles.section}>
-            <label style={styles.label}>범위 선택</label>
-            {rangesLoading ? (
-              <div style={styles.skeletonSelect} />
-            ) : (
-              <select
-                style={{
-                  ...styles.select,
-                  opacity: selectedSubjectId === null ? 0.4 : 1,
-                  cursor: selectedSubjectId === null ? 'not-allowed' : 'pointer',
-                }}
-                value={selectedRangeId ?? ''}
-                onChange={(e) => setSelectedRangeId(Number(e.target.value))}
-                disabled={selectedSubjectId === null}
-              >
-                <option value="" disabled>
-                  {selectedSubjectId === null ? '먼저 과목을 선택하세요' : '범위를 선택하세요'}
-                </option>
-                {ranges?.map((r) => (
-                  <option key={r.id} value={r.id}>{r.name}</option>
-                ))}
-              </select>
-            )}
-          </section>
-
-          <div style={styles.divider} />
-
-          {/* ③ 난이도 선택 */}
-          <section style={styles.section}>
-            <label style={styles.label}>난이도</label>
-            <div style={styles.chipGroup}>
-              {DIFFICULTY_OPTIONS.map((opt) => {
-                const active = difficulty === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    style={{
-                      ...styles.chip,
-                      borderColor: active ? opt.color : 'rgba(255,255,255,0.1)',
-                      background:  active ? opt.color + '22' : 'rgba(255,255,255,0.04)',
-                      color:       active ? opt.color : '#94a3b8',
-                    }}
-                    onClick={() => setDifficulty(opt.value)}
-                  >
-                    {opt.emoji} {opt.label}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+            {/* ② 범위 선택 */}
+            <section style={{ ...styles.section, flex: 1 }}>
+              <label style={styles.label}>범위</label>
+              {rangesLoading ? (
+                <div style={styles.skeletonSelect} />
+              ) : (
+                <select
+                  style={{
+                    ...styles.select,
+                    opacity: selectedSubjectId === null ? 0.4 : 1,
+                    cursor: selectedSubjectId === null ? 'not-allowed' : 'pointer',
+                  }}
+                  value={selectedRangeId ?? ''}
+                  onChange={(e) => setSelectedRangeId(Number(e.target.value))}
+                  disabled={selectedSubjectId === null}
+                >
+                  <option value="" disabled>
+                    {selectedSubjectId === null ? '과목 미선택' : '범위 선택'}
+                  </option>
+                  {ranges?.map((r) => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
+                  ))}
+                </select>
+              )}
+            </section>
+          </div>
 
           <div style={styles.divider} />
 
-          {/* ④ 문제 형식 선택 */}
-          <section style={styles.section}>
-            <label style={styles.label}>문제 형식</label>
-            <div style={styles.typeGroup}>
-              <button
-                style={{
-                  ...styles.typeCard,
-                  borderColor: format === 'MULTIPLE_CHOICE' ? '#a78bfa' : 'rgba(255,255,255,0.08)',
-                  background:  format === 'MULTIPLE_CHOICE' ? '#a78bfa11' : 'rgba(255,255,255,0.03)',
-                }}
-                onClick={() => setFormat('MULTIPLE_CHOICE')}
-              >
-                <span style={{ ...styles.typeTitle, color: format === 'MULTIPLE_CHOICE' ? '#a78bfa' : '#e0e7ff', marginTop: '0.5rem' }}>
+          {/* ④ 문제 형식 & 난이도 (한 줄로) */}
+          <div style={styles.sectionRow}>
+            <section style={{ ...styles.section, flex: 1 }}>
+              <label style={styles.label}>난이도</label>
+              <div style={styles.chipGroup}>
+                {DIFFICULTY_OPTIONS.map((opt) => {
+                  const active = difficulty === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      style={{
+                        ...styles.chip,
+                        padding: '0.4rem 0.8rem',
+                        fontSize: '0.85rem',
+                        borderColor: active ? opt.color : 'rgba(255,255,255,0.1)',
+                        background:  active ? opt.color + '22' : 'rgba(255,255,255,0.04)',
+                        color:       active ? opt.color : '#94a3b8',
+                      }}
+                      onClick={() => setDifficulty(opt.value)}
+                    >
+                      {opt.emoji} {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section style={{ ...styles.section, flex: 1 }}>
+              <label style={styles.label}>문제 형식</label>
+              <div style={styles.chipGroup}>
+                <button
+                  style={{
+                    ...styles.chip,
+                    padding: '0.4rem 0.8rem',
+                    fontSize: '0.85rem',
+                    borderColor: format === 'MULTIPLE_CHOICE' ? '#a78bfa' : 'rgba(255,255,255,0.1)',
+                    background:  format === 'MULTIPLE_CHOICE' ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
+                    color:       format === 'MULTIPLE_CHOICE' ? '#a78bfa' : '#94a3b8',
+                  }}
+                  onClick={() => setFormat('MULTIPLE_CHOICE')}
+                >
                   객관식
-                </span>
-                <span style={styles.typeDesc}>선택지 중 하나 고르기</span>
-              </button>
-
-              <button
-                style={{
-                  ...styles.typeCard,
-                  borderColor: format === 'SHORT_ANSWER' ? '#a78bfa' : 'rgba(255,255,255,0.08)',
-                  background:  format === 'SHORT_ANSWER' ? '#a78bfa11' : 'rgba(255,255,255,0.03)',
-                }}
-                onClick={() => setFormat('SHORT_ANSWER')}
-              >
-                <span style={{ ...styles.typeTitle, color: format === 'SHORT_ANSWER' ? '#a78bfa' : '#e0e7ff', marginTop: '0.5rem' }}>
+                </button>
+                <button
+                  style={{
+                    ...styles.chip,
+                    padding: '0.4rem 0.8rem',
+                    fontSize: '0.85rem',
+                    borderColor: format === 'SHORT_ANSWER' ? '#a78bfa' : 'rgba(255,255,255,0.1)',
+                    background:  format === 'SHORT_ANSWER' ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
+                    color:       format === 'SHORT_ANSWER' ? '#a78bfa' : '#94a3b8',
+                  }}
+                  onClick={() => setFormat('SHORT_ANSWER')}
+                >
                   주관식
-                </span>
-                <span style={styles.typeDesc}>직접 정답 입력하기</span>
-              </button>
-            </div>
-          </section>
+                </button>
+              </div>
+            </section>
+          </div>
 
           <div style={styles.divider} />
 
@@ -348,7 +350,7 @@ const styles: Record<string, CSSProperties> = {
     fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif",
     position: 'relative',
     overflow: 'hidden',
-    padding: '2rem 1.5rem',
+    padding: '1rem 1.5rem 2rem',
   },
   bgOrb1: {
     position: 'absolute',
@@ -375,7 +377,7 @@ const styles: Record<string, CSSProperties> = {
     maxWidth: '520px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '1.25rem',
+    gap: '0.8rem',
     position: 'relative',
     zIndex: 1,
   },
@@ -391,11 +393,11 @@ const styles: Record<string, CSSProperties> = {
     borderRadius: '8px',
     padding: '6px 14px',
     cursor: 'pointer',
-    fontSize: '0.85rem',
+    fontSize: '0.8rem',
     whiteSpace: 'nowrap',
   },
   title: {
-    fontSize: '1.4rem',
+    fontSize: '1.25rem',
     fontWeight: '800',
     color: '#e0e7ff',
     margin: 0,
@@ -405,10 +407,10 @@ const styles: Record<string, CSSProperties> = {
     backdropFilter: 'blur(18px)',
     border: '1px solid rgba(255,255,255,0.09)',
     borderRadius: '20px',
-    padding: '1.75rem',
+    padding: '1.25rem',
     display: 'flex',
     flexDirection: 'column',
-    gap: '1.25rem',
+    gap: '0.85rem',
   },
   section: {
     display: 'flex',
@@ -462,26 +464,30 @@ const styles: Record<string, CSSProperties> = {
   divider: {
     height: '1px',
     background: 'rgba(255,255,255,0.07)',
-    margin: '0.25rem 0',
+    margin: '0.1rem 0',
+  },
+  sectionRow: {
+    display: 'flex',
+    gap: '0.85rem',
   },
   typeGroup: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: '0.75rem',
+    gap: '0.6rem',
   },
   typeCard: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '0.3rem',
-    padding: '1rem 0.5rem',
+    gap: '0.2rem',
+    padding: '0.6rem 0.5rem',
     borderRadius: '14px',
     border: '1.5px solid',
     cursor: 'pointer',
     transition: 'all 0.15s ease',
   },
   typeEmoji: {
-    fontSize: '1.6rem',
+    fontSize: '1.2rem',
   },
   typeTitle: {
     fontWeight: '700',
@@ -493,10 +499,10 @@ const styles: Record<string, CSSProperties> = {
     textAlign: 'center',
   },
   typeScore: {
-    fontSize: '0.8rem',
+    fontSize: '0.75rem',
     color: '#94a3b8',
     fontWeight: '500',
-    marginTop: '0.1rem',
+    marginTop: '0.05rem',
   },
   scorePreview: {
     display: 'flex',
@@ -530,12 +536,12 @@ const styles: Record<string, CSSProperties> = {
   },
   startBtn: {
     width: '100%',
-    padding: '0.9rem',
+    padding: '0.8rem',
     background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
     border: 'none',
     borderRadius: '12px',
     color: '#fff',
-    fontSize: '1rem',
+    fontSize: '0.95rem',
     fontWeight: '700',
     cursor: 'pointer',
     boxShadow: '0 6px 24px rgba(99,102,241,0.4)',

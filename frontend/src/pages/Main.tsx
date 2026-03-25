@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useMe } from '../api/userApi';
 import useAuthStore from '../store/useAuthStore';
 import type { CSSProperties } from 'react';
@@ -43,7 +44,10 @@ function getGrade(score: number): Grade {
 
 // 다음 등급까지의 진행도 계산
 function getProgress(score: number): number {
-  const idx = GRADES.findLastIndex((g: Grade) => score >= g.min);
+  let idx = 0;
+  for (let i = 0; i < GRADES.length; i++) {
+    if (score >= GRADES[i].min) idx = i;
+  }
   const next = GRADES[idx + 1];
   if (!next) return 100;
   const cur = GRADES[idx];
@@ -80,6 +84,7 @@ const ACTIONS: Action[] = [
 
 export default function Main(): React.ReactElement {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user, clearAuth } = useAuthStore();
   const { data: me, isLoading, isError, error, refetch } = useMe();
 
@@ -88,9 +93,19 @@ export default function Main(): React.ReactElement {
   const score: number = profile?.totalScore ?? 0;
   const grade = getGrade(score);
   const progress = getProgress(score);
+  const isAdmin = profile?.email === 'majgong@manager.com';
+
+  const displayActions = isAdmin 
+      ? [
+          ACTIONS[0],
+          { id: 'admin_add', label: '문제 추가', desc: '관리자 전용 문제 등록', emoji: '⚙️', to: '/problem/create', primary: true },
+          ...ACTIONS.slice(1)
+        ]
+      : ACTIONS;
 
   const handleLogout = () => {
     clearAuth();
+    queryClient.clear();
     navigate('/login', { replace: true });
   };
 
@@ -173,10 +188,13 @@ export default function Main(): React.ReactElement {
 
         {/* 액션 버튼 그룹 */}
         <section style={styles.actionsGrid}>
-          {ACTIONS.map((action) => (
+          {displayActions.map((action) => (
             <button
               key={action.id}
-              style={action.primary ? styles.actionCardPrimary : styles.actionCard}
+              style={{
+                ...(action.primary ? styles.actionCardPrimary : styles.actionCard),
+                ...(isAdmin && action.primary ? { gridColumn: 'auto' } : {}),
+              }}
               onClick={() => handleAction(action)}
             >
               <span style={styles.actionEmoji}>{action.emoji}</span>

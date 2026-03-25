@@ -7,6 +7,7 @@ import QuizSetting from './pages/QuizSetting';
 import QuizPlay from './pages/QuizPlay';
 import Ranking from './pages/Ranking';
 import OAuth2Callback from './pages/OAuth2Callback';
+import ProblemCreate from './pages/ProblemCreate';
 
 function App(): React.ReactElement {
   return (
@@ -20,6 +21,7 @@ function App(): React.ReactElement {
         <Route path="/quiz/setting" element={<QuizSetting />} />
         <Route path="/quiz/play" element={<QuizPlay />} />
         <Route path="/ranking" element={<Ranking />} />
+        <Route path="/problem/create" element={<ProblemCreate />} />
       </Routes>
     </BrowserRouter>
   );

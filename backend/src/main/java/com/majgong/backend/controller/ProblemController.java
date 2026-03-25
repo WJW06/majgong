@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.majgong.backend.dto.quiz.ProblemCreateRequest;
+
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -32,6 +35,15 @@ public class ProblemController {
     @PostMapping("/quiz")
     public ResponseEntity<QuizStartResponse> startQuiz(@RequestBody QuizStartRequest request) {
         return ResponseEntity.ok(quizService.generateQuiz(request));
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<Void> createProblem(@RequestBody ProblemCreateRequest request, Principal principal) {
+        if (principal == null || !"majgong@manager.com".equals(principal.getName())) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+        quizService.createProblem(request);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/count")

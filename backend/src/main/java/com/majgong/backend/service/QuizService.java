@@ -31,6 +31,30 @@ public class QuizService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void createProblem(ProblemCreateRequest request) {
+        com.majgong.backend.entity.ProblemRange range = problemRangeRepository.findById(request.getRangeId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Range ID"));
+
+        Problem problem = new Problem();
+        problem.setQuestion(request.getQuestion());
+        problem.setDifficulty(request.getDifficulty());
+        problem.setFormat(request.getFormat());
+        problem.setImageUrl(request.getImageUrl());
+        problem.setAnswer(request.getAnswer());
+        problem.setProblemRange(range);
+
+        if (request.getFormat() == com.majgong.backend.entity.ProblemFormat.MULTIPLE_CHOICE && request.getOptions() != null) {
+            for (String optText : request.getOptions()) {
+                ProblemOption option = new ProblemOption();
+                option.setText(optText);
+                option.setProblem(problem);
+                problem.getOptions().add(option);
+            }
+        }
+        problemRepository.save(problem);
+    }
+
     public List<ProblemRangeDto> getRangesBySubject(Long subjectId) {
         return problemRangeRepository.findBySubjectId(subjectId)
                 .stream()
