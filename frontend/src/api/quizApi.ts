@@ -13,12 +13,14 @@ const USE_MOCK = false;
 export interface Subject {
   id: number;
   name: string; // 예: '운영체제', '자료구조'
+  folderName: string;
 }
 
 /** 범위(챕터) 목록 응답 */
 export interface ProblemRange {
   id: number;
   name: string; // 예: '프로세스 관리', '메모리 관리'
+  folderName: string;
 }
 
 export interface QuizStartRequest {
@@ -93,22 +95,22 @@ async function authFetch<T>(url: string, token: string | null, options?: Request
 // ── Mock 데이터 (USE_MOCK = true 일 때 사용) ─────────────
 
 const MOCK_SUBJECTS: Subject[] = [
-  { id: 1, name: '수학' },
-  { id: 2, name: '영어' },
+  { id: 1, name: '수학', folderName: 'math' },
+  { id: 2, name: '영어', folderName: 'english' },
 ];
 
 const MOCK_RANGES: Record<number, ProblemRange[]> = {
   1: [ // 수학
-    { id: 101, name: '수와 연산' },
-    { id: 102, name: '방정식과 부등식' },
-    { id: 103, name: '함수와 그래프' },
-    { id: 104, name: '확률과 통계' },
+    { id: 101, name: '수와 연산', folderName: 'numOp' },
+    { id: 102, name: '방정식과 부등식', folderName: 'E&I' },
+    { id: 103, name: '함수와 그래프', folderName: 'funcGraph' },
+    { id: 104, name: '확률과 통계', folderName: 'probStat' },
   ],
   2: [ // 영어
-    { id: 201, name: '어휘 및 숙어' },
-    { id: 202, name: '문법' },
-    { id: 203, name: '독해' },
-    { id: 204, name: '듣기 및 말하기' },
+    { id: 201, name: '어휘 및 숙어', folderName: 'vocab' },
+    { id: 202, name: '문법', folderName: 'grammar' },
+    { id: 203, name: '독해', folderName: 'reading' },
+    { id: 204, name: '듣기 및 말하기', folderName: 'listening' },
   ],
 };
 

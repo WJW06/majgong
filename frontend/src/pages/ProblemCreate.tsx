@@ -28,6 +28,7 @@ export default function ProblemCreate(): React.ReactElement {
   const [difficulty, setDifficulty] = useState<'HIGH' | 'MEDIUM' | 'LOW'>('MEDIUM');
   
   const [imageUrl, setImageUrl] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [options, setOptions] = useState<string[]>(['', '', '', '', '']);
@@ -79,6 +80,41 @@ export default function ProblemCreate(): React.ReactElement {
     const newOptions = [...options];
     newOptions[index] = value;
     setOptions(newOptions);
+  };
+
+  // ── 드래그 앤 드롭 핸들러
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      
+      const selectedSubject = subjects?.find(s => s.id === subjectId);
+      const selectedRange = ranges?.find(r => r.id === rangeId);
+
+      if (!selectedSubject || !selectedRange) {
+        alert('과목과 범위를 먼저 선택해주세요.');
+        return;
+      }
+
+      // 경로 조립: /source/{subjectFolder}/{rangeFolder}/{fileName}
+      const subjectPart = encodeURIComponent(selectedSubject.folderName);
+      const rangePart = encodeURIComponent(selectedRange.folderName);
+      const filePart = encodeURIComponent(file.name);
+      const newUrl = `/source/${subjectPart}/${rangePart}/${filePart}`;
+      setImageUrl(newUrl);
+    }
   };
 
   return (
@@ -177,11 +213,41 @@ export default function ProblemCreate(): React.ReactElement {
 
           {/* 문제 및 이미지 입력 */}
           <section style={styles.sectionColumn}>
-            <label style={styles.label}>이미지 URL (선택)</label>
+            <label style={styles.label}>이미지 첨부 (Drag & Drop)</label>
+            <div 
+              style={{ 
+                ...styles.dropZone, 
+                ...(isDragging ? styles.dropZoneActive : {}),
+                ...(imageUrl ? styles.dropZoneFilled : {})
+              }}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              {imageUrl ? (
+                <div style={styles.previewContainer}>
+                  <img src={imageUrl} alt="Preview" style={styles.previewImage} onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Image+Not+Found';
+                  }} />
+                  <div style={styles.previewInfo}>
+                    <p style={styles.previewPath}>{imageUrl}</p>
+                    <button type="button" style={styles.btnReset} onClick={() => setImageUrl('')}>삭제</button>
+                  </div>
+                </div>
+              ) : (
+                <div style={styles.dropZonePlaceholder}>
+                  <span style={styles.dropIcon}>🖼️</span>
+                  <p>이미지 파일을 여기에 드래그하여 놓으세요</p>
+                  <p style={styles.dropSubText}>(backend/source 폴더에 저장된 파일명 기준)</p>
+                </div>
+              )}
+            </div>
+
+            <label style={styles.label}>이미지 URL (수동 입력)</label>
             <input 
               type="text" 
               style={styles.input} 
-              placeholder="http://example.com/image.png" 
+              placeholder="/source/math/E&I/problem1.png" 
               value={imageUrl} 
               onChange={e => setImageUrl(e.target.value)} 
             />
@@ -192,7 +258,7 @@ export default function ProblemCreate(): React.ReactElement {
               placeholder="문제를 입력하세요" 
               value={question} 
               onChange={e => setQuestion(e.target.value)} 
-              rows={3}
+              rows={2}
             />
           </section>
 
@@ -268,10 +334,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   container: {
     width: '100%', maxWidth: '640px',
-    display: 'flex', flexDirection: 'column', gap: '0.8rem',
+    display: 'flex', flexDirection: 'column', gap: '0.4rem',
     position: 'relative', zIndex: 1,
   },
-  header: { display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.2rem' },
+  header: { display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: 0 },
   backBtn: {
     display: 'inline-flex', alignItems: 'center', gap: '5px',
     background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
@@ -283,28 +349,28 @@ const styles: Record<string, React.CSSProperties> = {
   formCard: {
     background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)',
     border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px',
-    padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem',
+    padding: '0.8rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem',
   },
-  sectionRow: { display: 'flex', gap: '1rem', flexWrap: 'wrap' },
-  sectionColumn: { display: 'flex', flexDirection: 'column', gap: '0.5rem' },
-  flex1: { flex: '1 1 200px', display: 'flex', flexDirection: 'column', gap: '0.5rem' },
+  sectionRow: { display: 'flex', gap: '0.6rem', flexWrap: 'nowrap' },
+  sectionColumn: { display: 'flex', flexDirection: 'column', gap: '0.4rem' },
+  flex1: { flex: 1, display: 'flex', flexDirection: 'column', gap: '0.3rem' },
   label: { fontSize: '0.85rem', fontWeight: '600', color: '#94a3b8' },
   select: {
-    width: '100%', padding: '0.6rem', borderRadius: '10px',
+    width: '100%', padding: '0.4rem 0.6rem', borderRadius: '10px',
     border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)',
-    color: '#e0e7ff', fontSize: '0.9rem', outline: 'none',
+    color: '#e0e7ff', fontSize: '0.85rem', outline: 'none',
   },
   input: {
-    width: '100%', padding: '0.6rem', borderRadius: '10px',
+    width: '100%', padding: '0.4rem 0.6rem', borderRadius: '10px',
     border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)',
-    color: '#e0e7ff', fontSize: '0.9rem', outline: 'none',
+    color: '#e0e7ff', fontSize: '0.85rem', outline: 'none',
   },
   textarea: {
-    width: '100%', padding: '0.6rem', borderRadius: '10px',
+    width: '100%', padding: '0.4rem 0.6rem', borderRadius: '10px',
     border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)',
-    color: '#e0e7ff', fontSize: '0.9rem', outline: 'none', resize: 'vertical',
+    color: '#e0e7ff', fontSize: '0.85rem', outline: 'none', resize: 'vertical',
   },
-  chipGroup: { display: 'flex', gap: '0.4rem', flexWrap: 'wrap', width: '100%' },
+  chipGroup: { display: 'flex', gap: '0.4rem', flexWrap: 'nowrap', width: '100%' },
   chip: {
     flex: 1, padding: '0.5rem', borderRadius: '10px',
     border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)',
@@ -315,21 +381,60 @@ const styles: Record<string, React.CSSProperties> = {
     borderColor: '#a78bfa', background: 'rgba(167,139,250,0.15)', color: '#a78bfa', fontWeight: '600',
   },
   optionsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' },
-  divider: { height: '1px', background: 'rgba(255,255,255,0.08)', margin: '0.2rem 0' },
+  divider: { height: '1px', background: 'rgba(255,255,255,0.08)', margin: '0.05rem 0' },
   btnSubmit: {
-    marginTop: '0.5rem', width: '100%', padding: '0.8rem',
+    marginTop: '0.2rem', width: '100%', padding: '0.6rem',
     borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-    color: '#fff', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer',
+    color: '#fff', fontSize: '0.95rem', fontWeight: 'bold', cursor: 'pointer',
     transition: 'transform 0.1s ease', boxShadow: '0 4px 15px rgba(99,102,241,0.3)',
   },
   btnPrimary: {
-    width: '100%', padding: '0.8rem',
+    width: '100%', padding: '0.6rem',
     borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-    color: '#fff', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer',
+    color: '#fff', fontSize: '0.95rem', fontWeight: 'bold', cursor: 'pointer',
   },
   footer: {
     textAlign: 'center',
     color: '#334155',
     fontSize: '0.75rem',
+  },
+  dropZone: {
+    width: '100%', minHeight: '60px', borderRadius: '16px',
+    border: '2px dashed rgba(255,255,255,0.15)',
+    background: 'rgba(255,255,255,0.02)',
+    display: 'flex', justifyContent: 'center', alignItems: 'center',
+    transition: 'all 0.2s ease', cursor: 'default',
+  },
+  dropZoneActive: {
+    borderColor: '#a78bfa', background: 'rgba(167,139,250,0.08)',
+  },
+  dropZoneFilled: {
+    borderStyle: 'solid', borderColor: 'rgba(255,255,255,0.1)',
+  },
+  dropZonePlaceholder: {
+    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+    color: '#94a3b8', fontSize: '0.9rem',
+  },
+  dropIcon: { fontSize: '1.2rem', marginBottom: '4px' },
+  dropSubText: { fontSize: '0.7rem', color: '#64748b', marginTop: '-4px' },
+  previewContainer: {
+    width: '100%', display: 'flex', gap: '0.8rem', padding: '0.4rem 0.8rem', alignItems: 'center',
+  },
+  previewImage: {
+    width: '50px', height: '50px', objectFit: 'contain', borderRadius: '8px',
+    background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)',
+  },
+  previewInfo: {
+    flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', overflow: 'hidden',
+  },
+  previewPath: {
+    fontSize: '0.75rem', color: '#cbd5e1', wordBreak: 'break-all', margin: 0,
+    background: 'rgba(0,0,0,0.2)', padding: '4px 8px', borderRadius: '6px',
+    maxHeight: '40px', overflow: 'hidden',
+  },
+  btnReset: {
+    alignSelf: 'flex-start', padding: '4px 12px', borderRadius: '8px',
+    background: 'rgba(248,113,113,0.15)', color: '#f87171', border: '1px solid rgba(248,113,113,0.3)',
+    cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600', transition: 'all 0.2s',
   },
 };

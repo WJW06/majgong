@@ -292,7 +292,7 @@ export default function QuizSetting(): React.ReactElement {
                 <span style={{ ...styles.typeTitle, color: quizType === 'EXAM' ? '#f43f5e' : '#e0e7ff' }}>
                   실전문제
                 </span>
-                <span style={styles.typeDesc}>5점 × 문제수 − 틀린 수</span>
+                <span style={styles.typeDesc}> (맞은 수 − 틀린 수) x 5 </span>
                 <span style={styles.typeScore}>최대 {count * 5}점</span>
               </button>
             </div>

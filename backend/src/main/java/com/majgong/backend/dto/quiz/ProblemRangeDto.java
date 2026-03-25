@@ -13,8 +13,9 @@ import lombok.Setter;
 public class ProblemRangeDto {
     private Long id;
     private String name;
+    private String folderName;
 
     public static ProblemRangeDto from(ProblemRange range) {
-        return new ProblemRangeDto(range.getId(), range.getName());
+        return new ProblemRangeDto(range.getId(), range.getName(), range.getFolderName());
     }
 }

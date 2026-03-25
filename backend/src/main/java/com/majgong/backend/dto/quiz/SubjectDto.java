@@ -13,8 +13,9 @@ import lombok.Setter;
 public class SubjectDto {
     private Long id;
     private String name;
+    private String folderName;
 
     public static SubjectDto from(Subject subject) {
-        return new SubjectDto(subject.getId(), subject.getName());
+        return new SubjectDto(subject.getId(), subject.getName(), subject.getFolderName());
     }
 }

@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .formLogin().disable()
                 .httpBasic().disable()
                 .authorizeRequests()
-                        .antMatchers("/", "/api/v1/auth/**", "/oauth2/**", "/h2-console/**", "/error").permitAll()
+                        .antMatchers("/", "/api/v1/auth/**", "/oauth2/**", "/h2-console/**", "/error", "/source/**").permitAll()
                         .anyRequest().authenticated()
                 .and()
                 .oauth2Login()

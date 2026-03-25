@@ -18,6 +18,9 @@ public class ProblemRange {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = true)
+    private String folderName;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_id", nullable = false)
     private Subject subject;

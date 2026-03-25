@@ -38,12 +38,12 @@ public class DataInitializer implements CommandLineRunner {
     @Transactional
     public void initializeData() {
         // Idempotent initialization: Find first or Create
-        Subject math = findOrCreateSubject("수학");
-        Subject english = findOrCreateSubject("영어");
+        Subject math = findOrCreateSubject("수학", "math");
+        Subject english = findOrCreateSubject("영어", "english");
 
-        ProblemRange mathRange1 = findOrCreateRange("수와 연산", math);
-        ProblemRange mathRange2 = findOrCreateRange("방정식과 부등식", math);
-        ProblemRange engRange1 = findOrCreateRange("어휘 및 숙어", english);
+        ProblemRange mathRange1 = findOrCreateRange("수와 연산", "numOp", math);
+        ProblemRange mathRange2 = findOrCreateRange("방정식과 부등식", "E&I", math);
+        ProblemRange engRange1 = findOrCreateRange("어휘 및 숙어", "vocab", english);
 
         // --- Math Range 1 (수와 연산) ---
         createProblemIfMissing(mathRange1, Difficulty.MEDIUM, "1 + 1은?", "2", Arrays.asList("1", "2", "3", "4", "5"), ProblemFormat.MULTIPLE_CHOICE, null);
@@ -90,23 +90,35 @@ public class DataInitializer implements CommandLineRunner {
         createProblemIfMissing(mathRange2, Difficulty.MEDIUM, "x + 10 = 20 일 때 x는?", "10", Collections.emptyList(), ProblemFormat.SHORT_ANSWER, null);
     }
 
-    private Subject findOrCreateSubject(String name) {
+    private Subject findOrCreateSubject(String name, String folderName) {
         List<Subject> subjects = subjectRepository.findByName(name);
         if (!subjects.isEmpty()) {
-            return subjects.get(0);
+            Subject s = subjects.get(0);
+            if (s.getFolderName() == null || !s.getFolderName().equals(folderName)) {
+                s.setFolderName(folderName);
+                return subjectRepository.save(s);
+            }
+            return s;
         }
         Subject s = new Subject();
         s.setName(name);
+        s.setFolderName(folderName);
         return subjectRepository.save(s);
     }
 
-    private ProblemRange findOrCreateRange(String name, Subject subject) {
+    private ProblemRange findOrCreateRange(String name, String folderName, Subject subject) {
         List<ProblemRange> ranges = problemRangeRepository.findByNameAndSubjectId(name, subject.getId());
         if (!ranges.isEmpty()) {
-            return ranges.get(0);
+            ProblemRange r = ranges.get(0);
+            if (r.getFolderName() == null || !r.getFolderName().equals(folderName)) {
+                r.setFolderName(folderName);
+                return problemRangeRepository.save(r);
+            }
+            return r;
         }
         ProblemRange r = new ProblemRange();
         r.setName(name);
+        r.setFolderName(folderName);
         r.setSubject(subject);
         return problemRangeRepository.save(r);
     }

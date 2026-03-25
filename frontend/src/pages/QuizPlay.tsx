@@ -23,7 +23,7 @@ type AnswerState = 'idle' | 'correct' | 'wrong';
 // ── 점수 계산 ───────────────────────────────────────────
 function calcScore(type: 'PRACTICE' | 'EXAM', total: number, correct: number, wrong: number): number {
   if (type === 'PRACTICE') return correct * 1;
-  return Math.max(0, total * 5 - wrong);
+  return (correct - wrong ) * 5;
 }
 
 // ── 컴포넌트 ────────────────────────────────────────────
