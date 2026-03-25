@@ -239,6 +239,10 @@ export default function QuizPlay(): React.ReactElement {
               </button>
             </div>
           </div>
+
+          <footer style={styles.footer}>
+            © 2026 맞공(maj.gong) — WJW06
+          </footer>
         </div>
       </div>
     );
@@ -259,6 +263,10 @@ export default function QuizPlay(): React.ReactElement {
             설정으로 돌아가기
           </button>
         </div>
+        
+        <footer style={styles.footer}>
+          © 2026 맞공(maj.gong) — WJW06
+        </footer>
       </div>
     );
   }
@@ -400,6 +408,9 @@ export default function QuizPlay(): React.ReactElement {
           </span>
         </div>
 
+      <footer style={styles.footer}>
+        © 2026 맞공(maj.gong) — WJW06
+      </footer>
       </div>
     </div>
   );
@@ -611,5 +622,10 @@ const styles: Record<string, CSSProperties> = {
     border: 'none', borderRadius: '12px', color: '#fff',
     fontSize: '0.95rem', fontWeight: '700', cursor: 'pointer',
     boxShadow: '0 4px 16px rgba(99,102,241,0.4)',
+  },
+  footer: {
+    textAlign: 'center',
+    color: '#334155',
+    fontSize: '0.75rem',
   },
 };

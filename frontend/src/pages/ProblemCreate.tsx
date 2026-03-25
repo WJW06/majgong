@@ -235,7 +235,12 @@ export default function ProblemCreate(): React.ReactElement {
             {isPending ? '생성 중...' : '문제 생성'}
           </button>
         </form>
+
+        <footer style={styles.footer}>
+          © 2026 맞공(maj.gong) — WJW06
+        </footer>
       </main>
+
     </div>
   );
 }
@@ -321,5 +326,10 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%', padding: '0.8rem',
     borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
     color: '#fff', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer',
-  }
+  },
+  footer: {
+    textAlign: 'center',
+    color: '#334155',
+    fontSize: '0.75rem',
+  },
 };

@@ -68,10 +68,26 @@ async function authFetch<T>(url: string, token: string | null, options?: Request
     },
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({})) as { message?: string };
-    throw new Error(err.message || '요청에 실패했습니다.');
+    const errText = await res.text().catch(() => '');
+    let message = '요청에 실패했습니다.';
+    try {
+      if (errText) {
+        const errJson = JSON.parse(errText);
+        message = errJson.message || message;
+      }
+    } catch (e) {
+      // JSON 파싱 실패 시 기본 메시지 유지
+    }
+    throw new Error(message);
   }
-  return res.json() as Promise<T>;
+  
+  const text = await res.text();
+  if (!text) return {} as T;
+  try {
+    return JSON.parse(text) as T;
+  } catch (e) {
+    return {} as T;
+  }
 }
 
 // ── Mock 데이터 (USE_MOCK = true 일 때 사용) ─────────────

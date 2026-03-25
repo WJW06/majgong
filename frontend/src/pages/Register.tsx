@@ -187,6 +187,10 @@ export default function Register(): React.ReactElement {
           </button>
         </div>
       </div>
+
+      <footer style={styles.footer}>
+        © 2026 맞공(maj.gong) — WJW06
+      </footer>
     </div>
   </div>
   );
@@ -381,6 +385,12 @@ const styles: Record<string, CSSProperties> = {
   guideText: {
     fontSize: '0.9rem',
     color: '#94a3b8',
+  },
+  footer: {
+    textAlign: 'center',
+    color: '#334155',
+    fontSize: '0.75rem',
+    marginTop: '10px',
   },
 };
 
