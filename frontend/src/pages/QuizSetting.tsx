@@ -66,8 +66,21 @@ export default function QuizSetting(): React.ReactElement {
         alert('선택한 조건에 해당하는 문제가 없습니다. 다른 설정을 선택해 주세요.');
         return;
       }
+      const selectedSubject = subjects?.find(s => s.id === selectedSubjectId);
+      const selectedRange = ranges?.find(r => r.id === selectedRangeId);
+      const selectedDifficulty = DIFFICULTY_OPTIONS.find(d => d.value === difficulty);
+
       // 문제 풀기 페이지로 이동, 문제 데이터 state로 전달
-      navigate('/quiz/play', { state: { quizData: data, quizType, count } });
+      navigate('/quiz/play', { 
+        state: { 
+          quizData: data, 
+          quizType, 
+          count,
+          subjectName: selectedSubject?.name,
+          rangeName: selectedRange?.name,
+          difficultyLabel: selectedDifficulty?.label
+        } 
+      });
     },
   });
 

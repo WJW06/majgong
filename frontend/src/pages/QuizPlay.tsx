@@ -15,6 +15,9 @@ interface LocationState {
   quizData: QuizStartResponse;
   quizType: 'PRACTICE' | 'EXAM';
   count: number;
+  subjectName?: string;
+  rangeName?: string;
+  difficultyLabel?: string;
 }
 
 // ── 답안 상태 ───────────────────────────────────────────
@@ -198,7 +201,7 @@ export default function QuizPlay(): React.ReactElement {
 
             <h2 style={styles.resultTitle}>퀴즈 완료!</h2>
             <p style={styles.resultSub}>
-              {quizType === 'PRACTICE' ? '연습문제' : '실전문제'} · {formatTime(elapsed)} 소요
+              {quizType === 'PRACTICE' ? '연습문제' : '실전문제'} · {state?.subjectName} · {state?.rangeName} · {state?.difficultyLabel} · {formatTime(elapsed)}
             </p>
 
             {/* 점수 강조 */}
