@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ProblemRepository extends JpaRepository<Problem, Long> {
 
-    @Query("SELECT p FROM Problem p WHERE p.problemRange.id = :rangeId AND p.difficulty = :difficulty AND p.format = :format")
+    @Query("SELECT DISTINCT p FROM Problem p WHERE p.problemRange.id = :rangeId AND p.difficulty = :difficulty AND p.format = :format")
     List<Problem> findByProblemRangeIdAndDifficultyAndFormat(@Param("rangeId") Long rangeId, @Param("difficulty") Difficulty difficulty, @Param("format") com.majgong.backend.entity.ProblemFormat format);
 
     long countByProblemRangeIdAndDifficultyAndFormat(Long problemRangeId, Difficulty difficulty, com.majgong.backend.entity.ProblemFormat format);
