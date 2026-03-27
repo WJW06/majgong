@@ -5,7 +5,7 @@ import { useSubjects, useRanges, useProblemCount, startQuiz } from '../api/quizA
 import type { QuizStartRequest, QuizStartResponse } from '../api/quizApi';
 import useAuthStore from '../store/useAuthStore';
 
-// ── 상수 ────────────────────────────────────────────────
+// ── Constants ────────────────────────────────────────────────
 
 type Difficulty = 'HIGH' | 'MEDIUM' | 'LOW';
 type QuizType = 'PRACTICE' | 'EXAM';
@@ -35,13 +35,13 @@ const COUNT_OPTIONS: CountOption[] = [
   { value: 50,  label: '50문제'  },
 ];
 
-// ── 컴포넌트 ────────────────────────────────────────────
+// ── Component ────────────────────────────────────────────
 
 export default function QuizSetting(): React.ReactElement {
   const navigate = useNavigate();
   const token = useAuthStore((s) => s.token);
 
-  // ── 선택 상태
+  // ── Selection State
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
   const [selectedRangeId,   setSelectedRangeId]   = useState<number | null>(null);
   const [difficulty,        setDifficulty]         = useState<Difficulty>('MEDIUM');
@@ -49,12 +49,12 @@ export default function QuizSetting(): React.ReactElement {
   const [quizType,          setQuizType]          = useState<QuizType>('PRACTICE');
   const [format,            setFormat]            = useState<'MULTIPLE_CHOICE' | 'SHORT_ANSWER'>('MULTIPLE_CHOICE');
 
-  // ── API 훅
+  // ── API hooks
   const { data: subjects, isLoading: subjectsLoading, isError: subjectsError } = useSubjects();
   const { data: ranges,   isLoading: rangesLoading }                           = useRanges(selectedSubjectId);
   const { data: availableCount, isLoading: countLoading }                      = useProblemCount(selectedRangeId, difficulty, format);
 
-  // ── 퀴즈 시작 mutation
+  // ── Quiz Start Mutation
   const { mutate: submitQuiz, isPending, error: submitError } = useMutation<
     QuizStartResponse,
     Error,
@@ -70,7 +70,7 @@ export default function QuizSetting(): React.ReactElement {
       const selectedRange = ranges?.find(r => r.id === selectedRangeId);
       const selectedDifficulty = DIFFICULTY_OPTIONS.find(d => d.value === difficulty);
 
-      // 문제 풀기 페이지로 이동, 문제 데이터 state로 전달
+      // Move to quiz play page and pass problem data via state
       navigate('/quiz/play', { 
         state: { 
           quizData: data, 
@@ -99,24 +99,24 @@ export default function QuizSetting(): React.ReactElement {
     });
   };
 
-  // 과목 변경 시 범위 초기화
+  // Reset range when subject changes
   const handleSubjectChange = (id: number) => {
     setSelectedSubjectId(id);
     setSelectedRangeId(null);
   };
 
-  // 예상 점수 계산 (미리보기)
+  // Calculate expected score (preview)
   const expectedScore =
     quizType === 'PRACTICE' ? count * 1 : count * 5;
 
   return (
     <div style={styles.page}>
-      {/* 배경 장식 */}
+      {/* Background decorations */}
       <div style={styles.bgOrb1} />
       <div style={styles.bgOrb2} />
 
       <div style={styles.container}>
-        {/* 헤더 */}
+        {/* Header */}
         <header style={styles.header}>
           <button style={styles.backBtn} onClick={() => navigate('/main')}>
             ← 돌아가기
@@ -124,11 +124,11 @@ export default function QuizSetting(): React.ReactElement {
           <h1 style={styles.title}>📝 문제 설정</h1>
         </header>
 
-        {/* 카드 영역 */}
+        {/* Card area */}
         <div style={styles.card}>
 
           <div style={styles.sectionRow}>
-            {/* ① 과목 선택 */}
+            {/* 1. Subject Selection */}
             <section style={{ ...styles.section, flex: 1 }}>
               <label style={styles.label}>과목</label>
               {subjectsLoading ? (
@@ -149,7 +149,7 @@ export default function QuizSetting(): React.ReactElement {
               )}
             </section>
 
-            {/* ② 범위 선택 */}
+            {/* 2. Range Selection */}
             <section style={{ ...styles.section, flex: 1 }}>
               <label style={styles.label}>범위</label>
               {rangesLoading ? (
@@ -178,7 +178,7 @@ export default function QuizSetting(): React.ReactElement {
 
           <div style={styles.divider} />
 
-          {/* ④ 문제 형식 & 난이도 (한 줄로) */}
+          {/* 4. Format & Difficulty (One Line) */}
           <div style={styles.sectionRow}>
             <section style={{ ...styles.section, flex: 1 }}>
               <label style={styles.label}>난이도</label>
@@ -240,7 +240,7 @@ export default function QuizSetting(): React.ReactElement {
 
           <div style={styles.divider} />
 
-          {/* ⑤ 문제 수 선택 */}
+          {/* 5. Question Count Selection */}
           <section style={styles.section}>
             <label style={styles.label}>문제 수</label>
             <div style={styles.chipGroup}>
@@ -271,11 +271,11 @@ export default function QuizSetting(): React.ReactElement {
 
           <div style={styles.divider} />
 
-          {/* ⑥ 문제 유형 선택 */}
+          {/* 6. Quiz Type Selection */}
           <section style={styles.section}>
             <label style={styles.label}>문제 유형</label>
             <div style={styles.typeGroup}>
-              {/* 연습문제 */}
+              {/* Practice Quiz */}
               <button
                 style={{
                   ...styles.typeCard,
@@ -292,7 +292,7 @@ export default function QuizSetting(): React.ReactElement {
                 <span style={styles.typeScore}>최대 {count}점</span>
               </button>
 
-              {/* 실전문제 */}
+              {/* Exam Quiz */}
               <button
                 style={{
                   ...styles.typeCard,
@@ -311,25 +311,25 @@ export default function QuizSetting(): React.ReactElement {
             </div>
           </section>
 
-          {/* 예상 점수 미리보기 */}
+          {/* Expected Score Preview */}
           <div style={styles.scorePreview}>
             <span style={styles.scorePreviewLabel}>예상 최대 점수</span>
             <span style={styles.scorePreviewValue}>{expectedScore.toLocaleString()}점</span>
           </div>
 
-          {/* 에러 메시지 */}
+          {/* Error message */}
           {submitError && (
             <p style={styles.errorText}>⚠️ {submitError.message}</p>
           )}
 
-          {/* 문제 부족 경고 */}
+          {/* Insufficient problems warning */}
           {isInsufficient && !countLoading && (
             <p style={styles.errorText}>
               ⚠️ 해당 조건의 문제가 부족합니다. (보유: {availableCount ?? 0}개)
             </p>
           )}
 
-          {/* 시작 버튼 */}
+          {/* Start button */}
           <button
             style={{
               ...styles.startBtn,
@@ -352,7 +352,7 @@ export default function QuizSetting(): React.ReactElement {
   );
 }
 
-// ── 스타일 ───────────────────────────────────────────────
+// ── Style ───────────────────────────────────────────────
 const styles: Record<string, CSSProperties> = {
   page: {
     minHeight: '100vh',

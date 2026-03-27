@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// ── 타입 정의 ──────────────────────────────────────────
+// ── Type Definition ──────────────────────────────────────────
 export interface User {
   id: number;
   name: string;
@@ -11,15 +11,15 @@ export interface User {
 }
 
 interface AuthState {
-  user: User | null;      // 로그인 유저 정보
-  token: string | null;   // JWT 액세스 토큰
+  user: User | null;      // Logged-in user information
+  token: string | null;   // JWT access token
 
   setAuth: (user: User, token: string) => void;
   setUser: (user: User) => void;
   clearAuth: () => void;
 }
 
-// 로그인 유저 전역 상태 (Zustand + localStorage 영속화)
+// Global state for logged-in user (Zustand + localStorage persistence)
 const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -31,7 +31,7 @@ const useAuthStore = create<AuthState>()(
       clearAuth: () => set({ user: null, token: null }),
     }),
     {
-      name: 'majgong-auth', // localStorage 키
+      name: 'majgong-auth', // localStorage key
     }
   )
 );

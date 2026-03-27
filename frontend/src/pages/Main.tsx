@@ -5,7 +5,7 @@ import { useMe } from '../api/userApi';
 import useAuthStore from '../store/useAuthStore';
 import type { CSSProperties } from 'react';
 
-// ── 타입 정의 ──────────────────────────────────────────
+// ── Type Definition ──────────────────────────────────────────
 interface Grade {
   label: string;
   min: number;
@@ -23,7 +23,6 @@ interface Action {
   primary: boolean;
 }
 
-// ── 등급 데이터 ────────────────────────────────────────
 const GRADES: Grade[] = [
   { label: '입문',   min: 0,    color: '#9ca3af', emoji: '🌱' },
   { label: '초급',   min: 50,   color: '#34d399', emoji: '🌿' },
@@ -33,7 +32,7 @@ const GRADES: Grade[] = [
   { label: '전설',   min: 1000, color: '#f43f5e', emoji: '🔥' },
 ];
 
-// 점수 기반 등급 계산
+// Calcurate grade
 function getGrade(score: number): Grade {
   let grade = GRADES[0];
   for (const g of GRADES) {
@@ -42,7 +41,7 @@ function getGrade(score: number): Grade {
   return grade;
 }
 
-// 다음 등급까지의 진행도 계산
+// Calculate progress to the next grade
 function getProgress(score: number): number {
   let idx = 0;
   for (let i = 0; i < GRADES.length; i++) {
@@ -54,7 +53,7 @@ function getProgress(score: number): number {
   return Math.min(100, Math.round(((score - cur.min) / (next.min - cur.min)) * 100));
 }
 
-// 액션 버튼 목록
+// Action button list
 const ACTIONS: Action[] = [
   {
     id: 'quiz',
@@ -88,7 +87,7 @@ export default function Main(): React.ReactElement {
   const { user, clearAuth } = useAuthStore();
   const { data: me, isLoading, isError, error, refetch } = useMe();
 
-  // API 응답이 있으면 우선, 없으면 store 캐시 사용
+  // If an API response is available, use the store cache first; otherwise, use the store cache.
   const profile = me ?? user;
   const score: number = profile?.totalScore ?? 0;
   const grade = getGrade(score);

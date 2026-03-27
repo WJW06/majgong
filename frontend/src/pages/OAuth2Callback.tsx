@@ -19,7 +19,7 @@ export default function OAuth2Callback(): React.ReactElement {
       return;
     }
 
-    // 받은 토큰으로 유저 정보 조회
+    // Retrieve user information using the received token
     fetchMe(token)
       .then((user) => {
         setAuth(user, token);

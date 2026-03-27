@@ -38,8 +38,8 @@ majgong/
 5. 순위표 페이지 - 전체 유저 순위 목록
 
 ## 점수 계산 방식
-- 연습문제: 1점 × 문제 개수
-- 실전문제: (5점 × 문제 개수) - 틀린 수
+- 연습문제: 1점 × 맞은 문제 수
+- 실전문제: 5점 × (맞은 문제 수 - 틀린 문제 수)
 
 ## 주요 API 엔드포인트
 - POST /api/v1/auth/login
@@ -47,9 +47,11 @@ majgong/
 - GET  /api/v1/users/me
 - GET  /api/v1/problems/subjects
 - GET  /api/v1/problems/ranges?subject={과목}
+- GET  /api/v1/problems/count?rangeId={ID}&difficulty={상/중/하}&format={객관식/주관식}
 - POST /api/v1/problems/quiz
+- POST /api/v1/problems/create (관리자 전용)
 - POST /api/v1/scores
-- GET  /api/v1/ranking
+- GET  /api/v1/ranking (현재 FE Mock 데이터 사용)
 
 ## 코드 작성 원칙
 - 한국어 주석 사용

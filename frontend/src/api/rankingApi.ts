@@ -3,11 +3,9 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import useAuthStore from '../store/useAuthStore';
 
 const API_BASE = '/api/v1';
-
-/** true이면 백엔드 대신 mock 데이터를 사용 */
 const USE_MOCK = true;
 
-// ── 타입 정의 ──────────────────────────────────────────
+// ── Type Definition ──────────────────────────────────────────
 
 export interface RankingEntry {
   rank: number;
@@ -17,7 +15,7 @@ export interface RankingEntry {
   totalScore: number;
 }
 
-// ── Mock 데이터 ────────────────────────────────────────
+// ── Mock data ────────────────────────────────────────
 
 const MOCK_RANKING: RankingEntry[] = [
   { rank: 1,  userId: 1,  name: '위재우', grade: '전설',    totalScore: 7777 },
@@ -32,7 +30,7 @@ const MOCK_RANKING: RankingEntry[] = [
   { rank: 10, userId: 10, name: '연근이', grade: '입문',    totalScore:    0 },
 ];
 
-// ── API 함수 ───────────────────────────────────────────
+// ── API function ───────────────────────────────────────────
 
 export const fetchRanking = async (token: string | null): Promise<RankingEntry[]> => {
   if (USE_MOCK) return Promise.resolve(MOCK_RANKING);
@@ -50,7 +48,7 @@ export const fetchRanking = async (token: string | null): Promise<RankingEntry[]
   return res.json() as Promise<RankingEntry[]>;
 };
 
-// ── React Query 커스텀 훅 ──────────────────────────────
+// ── React Query custom hook ──────────────────────────────
 
 export const useRanking = (): UseQueryResult<RankingEntry[], Error> => {
   const token = useAuthStore((s) => s.token);
@@ -58,6 +56,6 @@ export const useRanking = (): UseQueryResult<RankingEntry[], Error> => {
     queryKey: ['ranking'],
     queryFn: () => fetchRanking(token),
     enabled: USE_MOCK || !!token,
-    staleTime: 1000 * 60 * 2, // 2분 캐싱
+    staleTime: 1000 * 60 * 2,
   });
 };

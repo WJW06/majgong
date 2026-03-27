@@ -27,7 +27,7 @@ public class UserController {
                     .body(Collections.singletonMap("message", "인증되지 않은 사용자입니다."));
         }
 
-        // JwtAuthenticationFilter에서 이메일을 추출하여 저장했으므로 getName()이 이메일입니다.
+        // Since the email was extracted and saved from JwtAuthenticationFilter, getName() is the email.
         String email = authentication.getName();
         Optional<User> optionalUser = userRepository.findByEmail(email);
 

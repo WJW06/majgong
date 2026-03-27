@@ -3,23 +3,21 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import useAuthStore from '../store/useAuthStore';
 
 const API_BASE = '/api/v1';
-
-/** true이면 백엔드 대신 mock 데이터를 사용 (백엔드 완성 후 false로 변경) */
 const USE_MOCK = false;
 
-// ── 타입 정의 ──────────────────────────────────────────
+// ── Type Definition ──────────────────────────────────────────
 
-/** 과목 목록 응답 */
+/** Subject list response */
 export interface Subject {
   id: number;
-  name: string; // 예: '운영체제', '자료구조'
+  name: string;
   folderName: string;
 }
 
-/** 범위(챕터) 목록 응답 */
+/** Range (Chapter) list response */
 export interface ProblemRange {
   id: number;
-  name: string; // 예: '프로세스 관리', '메모리 관리'
+  name: string;
   folderName: string;
 }
 
@@ -28,8 +26,8 @@ export interface QuizStartRequest {
   rangeId: number;
   difficulty: 'HIGH' | 'MEDIUM' | 'LOW';
   count: number;
-  type: 'PRACTICE' | 'EXAM'; // 연습문제 | 실전문제
-  format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER'; // 오류/주관식
+  type: 'PRACTICE' | 'EXAM';
+  format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER';
 }
 
 export interface ProblemCreateRequest {
@@ -43,12 +41,12 @@ export interface ProblemCreateRequest {
   options?: string[];
 }
 
-/** 퀴즈 시작 응답 - 실제 문제 목록 */
+/** Quiz start response - Actual problem list */
 export interface QuizProblem {
   id: number;
   question: string;
   options: string[];
-  answer?: string; // 연습문제에서만 제공될 수 있음
+  answer?: string;
   format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER';
   imageUrl?: string | null;
 }
@@ -58,7 +56,7 @@ export interface QuizStartResponse {
   problems: QuizProblem[];
 }
 
-// ── API 함수 ───────────────────────────────────────────
+// ── API function ───────────────────────────────────────────
 
 async function authFetch<T>(url: string, token: string | null, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -78,7 +76,7 @@ async function authFetch<T>(url: string, token: string | null, options?: Request
         message = errJson.message || message;
       }
     } catch (e) {
-      // JSON 파싱 실패 시 기본 메시지 유지
+      // Maintain default message on JSON parsing failure
     }
     throw new Error(message);
   }
@@ -92,7 +90,7 @@ async function authFetch<T>(url: string, token: string | null, options?: Request
   }
 }
 
-// ── Mock 데이터 (USE_MOCK = true 일 때 사용) ─────────────
+// ── Mock data ─────────────
 
 const MOCK_SUBJECTS: Subject[] = [
   { id: 1, name: '수학', folderName: 'math' },
@@ -114,32 +112,32 @@ const MOCK_RANGES: Record<number, ProblemRange[]> = {
   ],
 };
 
-/** 과목 목록 조회 */
+/** Fetch subject list */
 export const fetchSubjects = (token: string | null): Promise<Subject[]> => {
   if (USE_MOCK) return Promise.resolve(MOCK_SUBJECTS);
   return authFetch<Subject[]>(`${API_BASE}/problems/subjects`, token);
 };
 
-/** 범위 목록 조회 (과목 ID 기반) */
+/** Fetch range list (Based on Subject ID) */
 export const fetchRanges = (token: string | null, subjectId: number): Promise<ProblemRange[]> => {
   if (USE_MOCK) return Promise.resolve(MOCK_RANGES[subjectId] ?? []);
   return authFetch<ProblemRange[]>(`${API_BASE}/problems/ranges?subject=${subjectId}`, token);
 };
 
-/** 문제 수 조회 */
+/** Fetch problem count */
 export const fetchProblemCount = (token: string | null, rangeId: number, difficulty: string, format: string): Promise<number> => {
-  if (USE_MOCK) return Promise.resolve(15); // Mock 값
+  if (USE_MOCK) return Promise.resolve(15);
   return authFetch<number>(`${API_BASE}/problems/count?rangeId=${rangeId}&difficulty=${difficulty}&format=${format}`, token);
 };
 
-/** 퀴즈 시작 (문제 목록 반환) */
+/** Start quiz (Returns problem list) */
 export const startQuiz = (token: string | null, body: QuizStartRequest) =>
   authFetch<QuizStartResponse>(`${API_BASE}/problems/quiz`, token, {
     method: 'POST',
     body: JSON.stringify(body),
   });
 
-/** 점수 제출 요청 body */
+/** Score submission request body */
 export interface ScoreSubmitRequest {
   quizId: number;
   type: 'PRACTICE' | 'EXAM';
@@ -149,17 +147,16 @@ export interface ScoreSubmitRequest {
   score: number;
 }
 
-/** 점수 제출 응답 */
+/** Score submission response */
 export interface ScoreSubmitResponse {
   id: number;
   score: number;
   message: string;
 }
 
-/** 점수 제출 */
+/** Submit score */
 export const submitScore = (token: string | null, body: ScoreSubmitRequest): Promise<ScoreSubmitResponse> => {
   if (USE_MOCK) {
-    // mock 모드: 즉시 성공 응답 반환
     return Promise.resolve({ id: 0, score: body.score, message: '점수가 저장되었습니다.' });
   }
   return authFetch<ScoreSubmitResponse>(`${API_BASE}/scores`, token, {
@@ -168,42 +165,42 @@ export const submitScore = (token: string | null, body: ScoreSubmitRequest): Pro
   });
 };
 
-// ── React Query 커스텀 훅 ──────────────────────────────
+// ── React Query custom hook ──────────────────────────────
 
-/** 과목 목록 훅 */
+/** Subject list hook */
 export const useSubjects = (): UseQueryResult<Subject[], Error> => {
   const token = useAuthStore((s) => s.token);
   return useQuery<Subject[], Error>({
     queryKey: ['subjects'],
     queryFn: () => fetchSubjects(token),
-    enabled: USE_MOCK || !!token, // mock 모드에서는 토큰 불필요
-    staleTime: 1000 * 60 * 10, // 10분 캐싱
+    enabled: USE_MOCK || !!token,
+    staleTime: 1000 * 60 * 10,
   });
 };
 
-/** 범위 목록 훅 (과목 선택 시 활성화) */
+/** Range list hook (Active when subject is selected) */
 export const useRanges = (subjectId: number | null): UseQueryResult<ProblemRange[], Error> => {
   const token = useAuthStore((s) => s.token);
   return useQuery<ProblemRange[], Error>({
     queryKey: ['ranges', subjectId],
     queryFn: () => fetchRanges(token, subjectId!),
-    enabled: (USE_MOCK || !!token) && subjectId !== null, // mock 모드에서는 토큰 불필요
+    enabled: (USE_MOCK || !!token) && subjectId !== null,
     staleTime: 1000 * 60 * 10,
   });
 };
 
-/** 문제 수 조회 훅 */
+/** Problem count lookup hook */
 export const useProblemCount = (rangeId: number | null, difficulty: string, format: string): UseQueryResult<number, Error> => {
   const token = useAuthStore((s) => s.token);
   return useQuery<number, Error>({
     queryKey: ['problemCount', rangeId, difficulty, format],
     queryFn: () => fetchProblemCount(token, rangeId!, difficulty, format),
     enabled: !!token && rangeId !== null,
-    staleTime: 1000 * 60 * 5, // 5분 캐싱
+    staleTime: 1000 * 60 * 5,
   });
 };
 
-/** 문제 생성 */
+/** Create problem */
 export const createProblem = (token: string | null, data: ProblemCreateRequest): Promise<void> => {
   return authFetch<void>(`${API_BASE}/problems/create`, token, {
     method: 'POST',

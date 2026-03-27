@@ -4,7 +4,7 @@ import { useRanking } from '../api/rankingApi';
 import useAuthStore from '../store/useAuthStore';
 import type { RankingEntry } from '../api/rankingApi';
 
-// ── 등급 메타데이터 ────────────────────────────────────
+// ── Grade Metadata ────────────────────────────────────
 const GRADE_META: Record<string, { color: string; emoji: string }> = {
   '입문':   { color: '#9ca3af', emoji: '🌱' },
   '초급':   { color: '#34d399', emoji: '🌿' },
@@ -14,10 +14,10 @@ const GRADE_META: Record<string, { color: string; emoji: string }> = {
   '전설':   { color: '#f43f5e', emoji: '🔥' },
 };
 
-// 상위 3위 메달
+// Top 3 medals
 const MEDAL = ['🥇', '🥈', '🥉'];
 
-// ── 컴포넌트 ────────────────────────────────────────────
+// ── Component ────────────────────────────────────────────
 export default function Ranking(): React.ReactElement {
   const navigate = useNavigate();
   const me = useAuthStore((s) => s.user);
@@ -25,20 +25,20 @@ export default function Ranking(): React.ReactElement {
 
   const { data: ranking, isLoading, isError, error, refetch } = useRanking();
 
-  // 검색 필터
+  // Search filter
   const filtered: RankingEntry[] = (ranking ?? []).filter((r) =>
     r.name.includes(search.trim())
   );
 
   return (
     <div style={styles.page}>
-      {/* 배경 장식 */}
+      {/* Background decorations */}
       <div style={styles.bgOrb1} />
       <div style={styles.bgOrb2} />
 
       <div style={styles.container}>
 
-        {/* 헤더 */}
+        {/* Header */}
         <header style={styles.header}>
           <button style={styles.backBtn} onClick={() => navigate('/main')}>
             ← 돌아가기
@@ -46,7 +46,7 @@ export default function Ranking(): React.ReactElement {
           <h1 style={styles.title}>🏆 순위표</h1>
         </header>
 
-        {/* 로딩 */}
+        {/* Loading */}
         {isLoading && (
           <div style={styles.centerBox}>
             <div style={styles.spinner} />
@@ -54,7 +54,7 @@ export default function Ranking(): React.ReactElement {
           </div>
         )}
 
-        {/* 에러 */}
+        {/* Error */}
         {isError && (
           <div style={styles.centerBox}>
             <p style={styles.errorText}>⚠️ {(error as Error).message}</p>
@@ -64,10 +64,10 @@ export default function Ranking(): React.ReactElement {
 
         {ranking && (
           <>
-            {/* 상위 3위 포디엄 */}
+            {/* Top 3 Podium */}
             {ranking.length >= 3 && <Podium top3={ranking.slice(0, 3)} />}
 
-            {/* 내 순위 빠른 찾기 */}
+            {/* Quick find my rank */}
             {me && (() => {
               const myEntry = ranking.find((r) => r.name === me.name);
               if (!myEntry) return null;
@@ -84,7 +84,7 @@ export default function Ranking(): React.ReactElement {
               );
             })()}
 
-            {/* 검색 */}
+            {/* Search */}
             <div style={styles.searchWrap}>
               <span style={styles.searchIcon}>🔍</span>
               <input
@@ -98,7 +98,7 @@ export default function Ranking(): React.ReactElement {
               )}
             </div>
 
-            {/* 전체 목록 */}
+            {/* Full list */}
             <div style={styles.listCard}>
               {/* 헤더 행 */}
               <div style={styles.listHeader}>
@@ -133,9 +133,9 @@ export default function Ranking(): React.ReactElement {
   );
 }
 
-// ── 포디엄 (1~3위) ─────────────────────────────────────
+// ── Podium (Top 3) ─────────────────────────────────────
 function Podium({ top3 }: { top3: RankingEntry[] }) {
-  // 2위-1위-3위 순서로 배치
+  // Arranged in 2nd-1st-3rd order
   const order = [top3[1], top3[0], top3[2]];
   const heights = ['60px', '80px', '48px'];
   const ranks   = [2, 1, 3];
@@ -177,7 +177,7 @@ function Podium({ top3 }: { top3: RankingEntry[] }) {
   );
 }
 
-// ── 순위 행 ────────────────────────────────────────────
+// ── Rank Row ────────────────────────────────────────────
 function RankRow({ entry, isMe }: { entry: RankingEntry; isMe: boolean }) {
   const meta = GRADE_META[entry.grade] ?? { color: '#94a3b8', emoji: '🌱' };
   return (
@@ -209,7 +209,7 @@ function RankRow({ entry, isMe }: { entry: RankingEntry; isMe: boolean }) {
   );
 }
 
-// ── 스타일 ───────────────────────────────────────────────
+// ── Style ───────────────────────────────────────────────
 const styles: Record<string, CSSProperties> = {
   page: {
     minHeight: '100vh',
@@ -237,7 +237,7 @@ const styles: Record<string, CSSProperties> = {
     position: 'relative', zIndex: 1,
   },
 
-  // 헤더
+  // Header
   header:  { display: 'flex', alignItems: 'center', gap: '1rem' },
   backBtn: {
     background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
@@ -246,7 +246,7 @@ const styles: Record<string, CSSProperties> = {
   },
   title: { fontSize: '1.4rem', fontWeight: '800', color: '#e0e7ff', margin: 0 },
 
-  // 로딩/에러
+  // Loading/Error
   centerBox: {
     display: 'flex', flexDirection: 'column', alignItems: 'center',
     gap: '0.75rem', padding: '3rem 0',
@@ -265,7 +265,7 @@ const styles: Record<string, CSSProperties> = {
     cursor: 'pointer', fontSize: '0.85rem',
   },
 
-  // 포디엄
+  // Podium
   podiumWrap: {
     display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
     gap: '0.5rem', padding: '0.5rem 0 0',
@@ -282,7 +282,7 @@ const styles: Record<string, CSSProperties> = {
   },
   podiumRankNum: { fontSize: '1rem', fontWeight: '800', color: '#e0e7ff' },
 
-  // 내 순위 카드
+  // My Rank Card
   myRankCard: {
     display: 'flex', alignItems: 'center', gap: '0.75rem',
     background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)',
@@ -292,7 +292,7 @@ const styles: Record<string, CSSProperties> = {
   myRankNum:   { fontSize: '1.1rem', fontWeight: '800', color: '#e0e7ff' },
   myRankScore: { marginLeft: 'auto', fontSize: '0.9rem', color: '#a5b4fc', fontWeight: '600' },
 
-  // 검색
+  // Search
   searchWrap: {
     display: 'flex', alignItems: 'center', gap: '0.5rem',
     background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)',
@@ -308,7 +308,7 @@ const styles: Record<string, CSSProperties> = {
     cursor: 'pointer', fontSize: '0.85rem', padding: '0',
   },
 
-  // 리스트
+  // List
   listCard: {
     background: 'rgba(255,255,255,0.04)',
     border: '1px solid rgba(255,255,255,0.08)',

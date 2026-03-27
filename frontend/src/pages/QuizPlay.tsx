@@ -10,7 +10,7 @@ import type {
 } from '../api/quizApi';
 import useAuthStore from '../store/useAuthStore';
 
-// ── 라우터 state 타입 ───────────────────────────────────
+// ── Router State Type ───────────────────────────────────
 interface LocationState {
   quizData: QuizStartResponse;
   quizType: 'PRACTICE' | 'EXAM';
@@ -20,23 +20,23 @@ interface LocationState {
   difficultyLabel?: string;
 }
 
-// ── 답안 상태 ───────────────────────────────────────────
+// ── Answer State ───────────────────────────────────────────
 type AnswerState = 'idle' | 'correct' | 'wrong';
 
-// ── 점수 계산 ───────────────────────────────────────────
+// ── Score Calculation ───────────────────────────────────────
 function calcScore(type: 'PRACTICE' | 'EXAM', total: number, correct: number, wrong: number): number {
   if (type === 'PRACTICE') return correct * 1;
   return (correct - wrong ) * 5;
 }
 
-// ── 컴포넌트 ────────────────────────────────────────────
+// ── Component ────────────────────────────────────────────
 export default function QuizPlay(): React.ReactElement {
   const navigate   = useNavigate();
   const location   = useLocation();
   const state      = location.state as LocationState | null;
   const token      = useAuthStore((s) => s.token);
 
-  // 설정 페이지를 거치지 않고 직접 접근한 경우 리다이렉트
+  // Redirect if accessed directly without going through setting page
   useEffect(() => {
     if (!state?.quizData) navigate('/quiz/setting', { replace: true });
   }, [state, navigate]);
@@ -47,20 +47,20 @@ export default function QuizPlay(): React.ReactElement {
   };
   const problems: QuizProblem[] = quizData.problems;
 
-  // ── 퀴즈 진행 상태
+  // ── Quiz Progress State
   const [currentIdx,    setCurrentIdx]    = useState(0);
   const [selectedOpt,   setSelectedOpt]   = useState<number | null>(null);
   const [answerState,   setAnswerState]   = useState<AnswerState>('idle');
   const [correctCount,  setCorrectCount]  = useState(0);
   const [wrongCount,    setWrongCount]    = useState(0);
-  const [elapsed,       setElapsed]       = useState(0); // 초 단위
+  const [elapsed,       setElapsed]       = useState(0); // Seconds
   const [isFinished,    setIsFinished]    = useState(false);
   const [userAnswers,   setUserAnswers]   = useState<(number | null)[]>(
     Array(problems.length).fill(null)
   );
   const [shortAnswerText, setShortAnswerText] = useState('');
 
-  // ── 타이머
+  // ── Timer
   useEffect(() => {
     if (isFinished) return;
     const timer = setInterval(() => setElapsed((s) => s + 1), 1000);
@@ -73,7 +73,7 @@ export default function QuizPlay(): React.ReactElement {
     return `${m}:${s}`;
   };
 
-  // ── 점수 제출 mutation
+  // ── Score Submission Mutation
   const { mutate: sendScore, isPending: submitting, isSuccess, data: scoreResult } = useMutation<
     ScoreSubmitResponse,
     Error,
@@ -82,7 +82,7 @@ export default function QuizPlay(): React.ReactElement {
     mutationFn: (body) => submitScore(token, body),
   });
 
-  // ── 퀴즈 종료 처리
+  // ── Quiz Completion Handling
   const finishQuiz = useCallback(
     (finalCorrect: number, finalWrong: number) => {
       setIsFinished(true);
@@ -99,9 +99,9 @@ export default function QuizPlay(): React.ReactElement {
     [quizType, problems.length, quizData.quizId, sendScore]
   );
 
-  // ── 보기 선택
+  // ── Option Selection
   const handleSelect = (optIdx: number) => {
-    if (answerState !== 'idle') return; // 이미 선택한 경우 무시
+    if (answerState !== 'idle') return; // Ignore if already selected
     setSelectedOpt(optIdx);
 
     const problem = problems[currentIdx];
@@ -109,7 +109,7 @@ export default function QuizPlay(): React.ReactElement {
     newAnswers[currentIdx] = optIdx;
     setUserAnswers(newAnswers);
 
-    // 연습문제: 즉시 정답 피드백 표시
+    // Practice: Show immediate answer feedback
     if (quizType === 'PRACTICE' && problem.answer !== undefined) {
       const isCorrect = problem.options[optIdx] === problem.answer;
       setAnswerState(isCorrect ? 'correct' : 'wrong');
@@ -121,12 +121,12 @@ export default function QuizPlay(): React.ReactElement {
         setTimeout(() => nextQuestion(newAnswers, correctCount, wrongCount + 1), 1200);
       }
     } else {
-      // 실전문제: 피드백 없이 바로 다음으로
+      // Exam: Go to next without feedback
       const isCorrect = problem.answer !== undefined && problem.options[optIdx] === problem.answer;
       const newCorrect = isCorrect ? correctCount + 1 : correctCount;
       const newWrong = !isCorrect ? wrongCount + 1 : wrongCount;
       
-      setAnswerState(isCorrect ? 'correct' : 'wrong'); // 블로킹을 위해 상태 변경
+      setAnswerState(isCorrect ? 'correct' : 'wrong'); // Change state for blocking
       
       if (isCorrect) setCorrectCount(newCorrect);
       else setWrongCount(newWrong);
@@ -179,7 +179,7 @@ export default function QuizPlay(): React.ReactElement {
     }
   };
 
-  // ── 결과 화면 ────────────────────────────────────────
+  // ── Result Screen ──────────────────────────────────────
   if (isFinished) {
     const totalCount  = problems.length;
     const score       = calcScore(quizType, totalCount, correctCount, wrongCount);
@@ -204,13 +204,13 @@ export default function QuizPlay(): React.ReactElement {
               {quizType === 'PRACTICE' ? '연습문제' : '실전문제'} · {state?.subjectName} · {state?.rangeName} · {state?.difficultyLabel} · {formatTime(elapsed)}
             </p>
 
-            {/* 점수 강조 */}
+            {/* Score Highlight */}
             <div style={styles.scoreCircle}>
               <span style={styles.scoreNum}>{score}</span>
               <span style={styles.scoreSuffix}>점</span>
             </div>
 
-            {/* 상세 통계 */}
+            {/* Detailed Statistics */}
             <div style={styles.statsRow}>
               <div style={styles.statItem}>
                 <span style={{ ...styles.statValue, color: '#34d399' }}>{correctCount}</span>
@@ -228,11 +228,11 @@ export default function QuizPlay(): React.ReactElement {
               </div>
             </div>
 
-            {/* 제출 상태 */}
+            {/* Submission Status */}
             {submitting && <p style={styles.savingText}>점수 저장 중...</p>}
             {isSuccess  && <p style={styles.savedText}>✅ {scoreResult?.message}</p>}
 
-            {/* 버튼 */}
+            {/* Buttons */}
             <div style={styles.resultBtns}>
               <button style={styles.btnSecondary} onClick={() => navigate('/quiz/setting')}>
                 다시 설정
@@ -251,7 +251,7 @@ export default function QuizPlay(): React.ReactElement {
     );
   }
 
-  // ── 문제 풀기 화면 ───────────────────────────────────
+  // ── Quiz Play Screen ──────────────────────────────────
   const problem  = problems[currentIdx];
   const progress = problems.length > 0 ? ((currentIdx) / problems.length) * 100 : 0;
 
@@ -337,7 +337,7 @@ export default function QuizPlay(): React.ReactElement {
         ) : (
           <div style={styles.optionsGrid}>
             {problem.options.map((opt, idx) => {
-              // 색상 결정
+              // Determine color
               let border = 'rgba(255,255,255,0.1)';
               let bg     = 'rgba(255,255,255,0.04)';
               let color  = '#e0e7ff';
@@ -352,11 +352,11 @@ export default function QuizPlay(): React.ReactElement {
                     border = '#a78bfa'; bg = '#a78bfa22'; color = '#a78bfa';
                   }
                 } else {
-                  // 실전문제(EXAM)는 정답 피드백 없이 선택 강조(보라색)만 유지
+                  // Exam Mode keeps only the selection highlight (purple) without answer feedback
                   border = '#a78bfa'; bg = '#a78bfa22'; color = '#a78bfa';
                 }
               }
-              // 연습 모드에서 오답 선택 후 정답 표시
+              // Show correct answer after wrong selection in Practice Mode
               if (
                 quizType === 'PRACTICE' &&
                 answerState === 'wrong' &&
@@ -419,7 +419,7 @@ export default function QuizPlay(): React.ReactElement {
   );
 }
 
-// ── 스타일 ───────────────────────────────────────────────
+// ── Style ───────────────────────────────────────────────
 const styles: Record<string, CSSProperties> = {
   page: {
     minHeight: '100vh',
@@ -450,7 +450,7 @@ const styles: Record<string, CSSProperties> = {
     position: 'relative', zIndex: 1,
   },
 
-  // ── 상단 바
+  // ── Top Bar
   topBar: {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
   },
@@ -465,7 +465,7 @@ const styles: Record<string, CSSProperties> = {
   },
   timer: { fontSize: '0.95rem', color: '#94a3b8', fontVariantNumeric: 'tabular-nums' },
 
-  // ── 진행 바
+  // ── Progress Bar
   progressWrap: {
     height: '5px', background: 'rgba(255,255,255,0.08)',
     borderRadius: '99px', overflow: 'hidden',
@@ -477,7 +477,7 @@ const styles: Record<string, CSSProperties> = {
     transition: 'width 0.4s ease',
   },
 
-  // ── 문제 카드
+  // ── Question Card
   questionCard: {
     background: 'rgba(255,255,255,0.05)',
     backdropFilter: 'blur(16px)',
@@ -492,7 +492,7 @@ const styles: Record<string, CSSProperties> = {
     color: '#e0e7ff', lineHeight: 1.6, margin: 0,
   },
 
-  // ── 보기
+  // ── Options
   optionsGrid: { 
     display: 'grid', 
     gridTemplateColumns: '1fr 1fr', 
@@ -519,7 +519,7 @@ const styles: Record<string, CSSProperties> = {
   },
   optionText: { fontSize: '0.95rem', fontWeight: '500', lineHeight: 1.4 },
 
-  // ── 피드백 배너
+  // ── Feedback Banner
   feedbackBanner: {
     textAlign: 'center', padding: '0.65rem',
     borderRadius: '10px', border: '1px solid',
@@ -557,14 +557,14 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: 'rgba(0,0,0,0.1)',
   },
 
-  // ── 정답 현황 바
+  // ── Answer Status Bar
   scoreBar: {
     display: 'flex', justifyContent: 'space-between',
     fontSize: '0.8rem', fontWeight: '600',
     padding: '0.5rem 0',
   },
 
-  // ── 결과 화면
+  // ── Result Screen
   resultCard: {
     background: 'rgba(255,255,255,0.06)',
     backdropFilter: 'blur(20px)',

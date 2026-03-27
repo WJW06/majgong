@@ -4,12 +4,12 @@ import { useMutation } from '@tanstack/react-query';
 import useAuthStore from '../store/useAuthStore';
 import { useSubjects, useRanges, createProblem, ProblemCreateRequest } from '../api/quizApi';
 
-// ── 컴포넌트 ────────────────────────────────────────────
+// ── Component ────────────────────────────────────────────
 export default function ProblemCreate(): React.ReactElement {
   const navigate = useNavigate();
   const { user, token } = useAuthStore();
 
-  // 관리자 권한 확인 (렌더링 레벨에서 튕겨냄)
+  // Check admin authority (rejected at rendering level)
   if (user?.email !== 'majgong@manager.com') {
     return (
       <div style={styles.page}>
@@ -21,7 +21,7 @@ export default function ProblemCreate(): React.ReactElement {
     );
   }
 
-  // ── 폼 상태
+  // ── Form State
   const [subjectId, setSubjectId] = useState<number | null>(null);
   const [rangeId, setRangeId] = useState<number | null>(null);
   const [format, setFormat] = useState<'MULTIPLE_CHOICE' | 'SHORT_ANSWER'>('MULTIPLE_CHOICE');
@@ -33,11 +33,11 @@ export default function ProblemCreate(): React.ReactElement {
   const [answer, setAnswer] = useState('');
   const [options, setOptions] = useState<string[]>(['', '', '', '', '']);
 
-  // ── API 훅
+  // ── API hooks
   const { data: subjects, isLoading: subjectsLoading } = useSubjects();
   const { data: ranges, isLoading: rangesLoading } = useRanges(subjectId);
 
-  // ── 문제 생성 mutation
+  // ── Problem Creation Mutation
   const { mutate: submitProblem, isPending } = useMutation({
     mutationFn: (data: ProblemCreateRequest) => createProblem(token, data),
     onSuccess: () => {
@@ -49,7 +49,7 @@ export default function ProblemCreate(): React.ReactElement {
     }
   });
 
-  // ── 제출 핸들러
+  // ── Submission Handler
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!subjectId || !rangeId || !question.trim() || !answer.trim()) {
@@ -82,7 +82,7 @@ export default function ProblemCreate(): React.ReactElement {
     setOptions(newOptions);
   };
 
-  // ── 드래그 앤 드롭 핸들러
+  // ── Drag & Drop Handler
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -108,7 +108,7 @@ export default function ProblemCreate(): React.ReactElement {
         return;
       }
 
-      // 경로 조립: /source/{subjectFolder}/{rangeFolder}/{fileName}
+      // Path assembly: /source/{subjectFolder}/{rangeFolder}/{fileName}
       const subjectPart = encodeURIComponent(selectedSubject.folderName);
       const rangePart = encodeURIComponent(selectedRange.folderName);
       const filePart = encodeURIComponent(file.name);
@@ -119,12 +119,12 @@ export default function ProblemCreate(): React.ReactElement {
 
   return (
     <div style={styles.page}>
-      {/* 배경 장식 */}
+      {/* Background decorations */}
       <div style={styles.bgOrb1} />
       <div style={styles.bgOrb2} />
 
       <main style={styles.container}>
-        {/* 헤더 */}
+        {/* Header */}
         <header style={styles.header}>
           <button style={styles.backBtn} onClick={() => navigate('/main')}>
             <span style={styles.backIcon}>←</span> 메인
@@ -134,7 +134,7 @@ export default function ProblemCreate(): React.ReactElement {
 
         <form onSubmit={handleSubmit} style={styles.formCard}>
           
-          {/* 과목 & 범위 선택 */}
+          {/* Subject & Range Selection */}
           <div style={styles.sectionRow}>
             <div style={styles.flex1}>
               <label style={styles.label}>과목</label>
@@ -169,7 +169,7 @@ export default function ProblemCreate(): React.ReactElement {
 
           <div style={styles.divider} />
 
-          {/* 문제 형식 & 난이도 선택 */}
+          {/* Format & Difficulty Selection */}
           <div style={styles.sectionRow}>
             <div style={styles.flex1}>
               <label style={styles.label}>문제 유형</label>
@@ -211,7 +211,7 @@ export default function ProblemCreate(): React.ReactElement {
 
           <div style={styles.divider} />
 
-          {/* 문제 및 이미지 입력 */}
+          {/* Problem and Image Input */}
           <section style={styles.sectionColumn}>
             <label style={styles.label}>이미지 첨부 (Drag & Drop)</label>
             <div 
@@ -264,7 +264,7 @@ export default function ProblemCreate(): React.ReactElement {
 
           <div style={styles.divider} />
 
-          {/* 객관식 보기 입력 */}
+          {/* Multiple Choice Options Input */}
           {format === 'MULTIPLE_CHOICE' && (
             <section style={styles.sectionColumn}>
               <label style={styles.label}>보기 입력 (5개)</label>
@@ -283,7 +283,7 @@ export default function ProblemCreate(): React.ReactElement {
             </section>
           )}
 
-          {/* 정답 입력 */}
+          {/* Correct Answer Input */}
           <section style={styles.sectionColumn}>
             <label style={styles.label}>
               {format === 'MULTIPLE_CHOICE' ? '정답 (객관식 보기 내용과 완전히 동일하게 작성)' : '정답 (직접 입력)'}
@@ -311,7 +311,7 @@ export default function ProblemCreate(): React.ReactElement {
   );
 }
 
-// ── 스타일 ───────────────────────────────────────────────
+// ── Style ───────────────────────────────────────────────
 const styles: Record<string, React.CSSProperties> = {
   page: {
     minHeight: '100vh',

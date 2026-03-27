@@ -2,15 +2,14 @@ import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import useAuthStore from '../store/useAuthStore';
 import type { User } from '../store/useAuthStore';
 
-// 기본 API URL
 const API_BASE = '/api/v1';
 
-// ── 타입 정의 ──────────────────────────────────────────
+// ── Type Definition ──────────────────────────────────────────
 interface ApiErrorResponse {
   message?: string;
 }
 
-// 내 정보 조회 API 함수
+// My Information Lookup API Function
 export const fetchMe = async (token: string | null): Promise<User> => {
   const res = await fetch(`${API_BASE}/users/me`, {
     headers: {
@@ -27,15 +26,15 @@ export const fetchMe = async (token: string | null): Promise<User> => {
   return res.json() as Promise<User>;
 };
 
-// React Query 커스텀 훅: 내 정보 조회
+// React Query custom hook: Lookup my information
 export const useMe = (): UseQueryResult<User, Error> => {
   const token = useAuthStore((s) => s.token);
 
   return useQuery<User, Error>({
     queryKey: ['me'],
     queryFn: () => fetchMe(token),
-    enabled: !!token, // 토큰이 있을 때만 실행
-    staleTime: 1000 * 60 * 5, // 5분 캐싱
+    enabled: !!token, // Execute only when a token exists
+    staleTime: 1000 * 60 * 5,
     retry: 1,
   });
 };
