@@ -37,4 +37,21 @@ public class User {
     @Column(nullable = false)
     private String role; // e.g. ROLE_USER
 
+    public void addScore(int score) {
+        this.totalScore += score;
+        if (this.totalScore < 0) {
+            this.totalScore = 0;
+        }
+        updateGrade();
+    }
+
+    private void updateGrade() {
+        if (this.totalScore >= 1000) this.grade = "전설";
+        else if (this.totalScore >= 500) this.grade = "마스터";
+        else if (this.totalScore >= 300) this.grade = "고급";
+        else if (this.totalScore >= 150) this.grade = "중급";
+        else if (this.totalScore >= 50) this.grade = "초급";
+        else this.grade = "입문";
+    }
+
 }

@@ -32,6 +32,10 @@ public class ScoreService {
         
         QuizScore saved = quizScoreRepository.save(score);
 
+        // 점수 및 등급 업데이트 연동
+        user.addScore(request.getScore());
+        userRepository.save(user);
+
         return new ScoreSubmitResponse(saved.getId(), saved.getScore(), "점수가 저장되었습니다.");
     }
 }

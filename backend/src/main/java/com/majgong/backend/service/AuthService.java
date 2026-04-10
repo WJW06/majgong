@@ -29,7 +29,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
                 .loginType(LoginType.LOCAL)
-                .grade("UNRANKED")
+                .grade("입문")
                 .totalScore(0)
                 .role("ROLE_USER")
                 .build();
