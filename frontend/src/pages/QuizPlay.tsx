@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, CSSProperties } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { submitScore } from '../api/quizApi';
 import type {
   QuizStartResponse,
@@ -26,15 +26,15 @@ type AnswerState = 'idle' | 'correct' | 'wrong';
 // ── Score Calculation ───────────────────────────────────────
 function calcScore(type: 'PRACTICE' | 'EXAM', total: number, correct: number, wrong: number): number {
   if (type === 'PRACTICE') return correct * 1;
-  return (correct - wrong ) * 5;
+  return (correct - wrong) * 5;
 }
 
 // ── Component ────────────────────────────────────────────
 export default function QuizPlay(): React.ReactElement {
-  const navigate   = useNavigate();
-  const location   = useLocation();
-  const state      = location.state as LocationState | null;
-  const token      = useAuthStore((s) => s.token);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as LocationState | null;
+  const token = useAuthStore((s) => s.token);
 
   // Redirect if accessed directly without going through setting page
   useEffect(() => {
@@ -48,14 +48,14 @@ export default function QuizPlay(): React.ReactElement {
   const problems: QuizProblem[] = quizData.problems;
 
   // ── Quiz Progress State
-  const [currentIdx,    setCurrentIdx]    = useState(0);
-  const [selectedOpt,   setSelectedOpt]   = useState<number | null>(null);
-  const [answerState,   setAnswerState]   = useState<AnswerState>('idle');
-  const [correctCount,  setCorrectCount]  = useState(0);
-  const [wrongCount,    setWrongCount]    = useState(0);
-  const [elapsed,       setElapsed]       = useState(0); // Seconds
-  const [isFinished,    setIsFinished]    = useState(false);
-  const [userAnswers,   setUserAnswers]   = useState<(number | null)[]>(
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [selectedOpt, setSelectedOpt] = useState<number | null>(null);
+  const [answerState, setAnswerState] = useState<AnswerState>('idle');
+  const [correctCount, setCorrectCount] = useState(0);
+  const [wrongCount, setWrongCount] = useState(0);
+  const [elapsed, setElapsed] = useState(0); // Seconds
+  const [isFinished, setIsFinished] = useState(false);
+  const [userAnswers, setUserAnswers] = useState<(number | null)[]>(
     Array(problems.length).fill(null)
   );
   const [shortAnswerText, setShortAnswerText] = useState('');
@@ -73,6 +73,8 @@ export default function QuizPlay(): React.ReactElement {
     return `${m}:${s}`;
   };
 
+  const queryClient = useQueryClient();
+
   // ── Score Submission Mutation
   const { mutate: sendScore, isPending: submitting, isSuccess, data: scoreResult } = useMutation<
     ScoreSubmitResponse,
@@ -80,6 +82,10 @@ export default function QuizPlay(): React.ReactElement {
     ScoreSubmitRequest
   >({
     mutationFn: (body) => submitScore(token, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      queryClient.invalidateQueries({ queryKey: ['ranking'] });
+    }
   });
 
   // ── Quiz Completion Handling
@@ -125,9 +131,9 @@ export default function QuizPlay(): React.ReactElement {
       const isCorrect = problem.answer !== undefined && problem.options[optIdx] === problem.answer;
       const newCorrect = isCorrect ? correctCount + 1 : correctCount;
       const newWrong = !isCorrect ? wrongCount + 1 : wrongCount;
-      
+
       setAnswerState(isCorrect ? 'correct' : 'wrong'); // Change state for blocking
-      
+
       if (isCorrect) setCorrectCount(newCorrect);
       else setWrongCount(newWrong);
       setTimeout(() => nextQuestion(newAnswers, newCorrect, newWrong), 500);
@@ -140,11 +146,11 @@ export default function QuizPlay(): React.ReactElement {
 
     const problem = problems[currentIdx];
     const newAnswers = [...userAnswers];
-    newAnswers[currentIdx] = null; 
+    newAnswers[currentIdx] = null;
     setUserAnswers(newAnswers);
 
-    const isCorrect = problem.answer !== undefined && 
-        shortAnswerText.trim() === problem.answer.trim();
+    const isCorrect = problem.answer !== undefined &&
+      shortAnswerText.trim() === problem.answer.trim();
 
     if (quizType === 'PRACTICE' && problem.answer !== undefined) {
       setAnswerState(isCorrect ? 'correct' : 'wrong');
@@ -159,9 +165,9 @@ export default function QuizPlay(): React.ReactElement {
       const isCorrectExam = problem.answer !== undefined && shortAnswerText.trim() === problem.answer.trim();
       const newCorrect = isCorrectExam ? correctCount + 1 : correctCount;
       const newWrong = !isCorrectExam ? wrongCount + 1 : wrongCount;
-      
+
       setAnswerState(isCorrectExam ? 'correct' : 'wrong');
-      
+
       if (isCorrectExam) setCorrectCount(newCorrect);
       else setWrongCount(newWrong);
       setTimeout(() => nextQuestion(newAnswers, newCorrect, newWrong), 500);
@@ -181,9 +187,9 @@ export default function QuizPlay(): React.ReactElement {
 
   // ── Result Screen ──────────────────────────────────────
   if (isFinished) {
-    const totalCount  = problems.length;
-    const score       = calcScore(quizType, totalCount, correctCount, wrongCount);
-    const accuracy    = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+    const totalCount = problems.length;
+    const score = calcScore(quizType, totalCount, correctCount, wrongCount);
+    const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
 
     return (
       <div style={styles.page}>
@@ -230,7 +236,7 @@ export default function QuizPlay(): React.ReactElement {
 
             {/* Submission Status */}
             {submitting && <p style={styles.savingText}>점수 저장 중...</p>}
-            {isSuccess  && <p style={styles.savedText}>✅ {scoreResult?.message}</p>}
+            {isSuccess && <p style={styles.savedText}>✅ {scoreResult?.message}</p>}
 
             {/* Buttons */}
             <div style={styles.resultBtns}>
@@ -252,7 +258,7 @@ export default function QuizPlay(): React.ReactElement {
   }
 
   // ── Quiz Play Screen ──────────────────────────────────
-  const problem  = problems[currentIdx];
+  const problem = problems[currentIdx];
   const progress = problems.length > 0 ? ((currentIdx) / problems.length) * 100 : 0;
 
   if (!problem) {
@@ -266,7 +272,7 @@ export default function QuizPlay(): React.ReactElement {
             설정으로 돌아가기
           </button>
         </div>
-        
+
         <footer style={styles.footer}>
           © 2026 맞공(maj.gong) — WJW06
         </footer>
@@ -298,11 +304,11 @@ export default function QuizPlay(): React.ReactElement {
         </div>
 
         {/* 문제 카드 */}
-        <div style={{...styles.questionCard, flexDirection: 'column'}}>
+        <div style={{ ...styles.questionCard, flexDirection: 'column' }}>
           {problem.imageUrl && (
             <img src={problem.imageUrl} alt="문제 이미지" style={styles.problemImage} />
           )}
-          <p style={{...styles.questionText, marginTop: problem.imageUrl ? '1rem' : 0}}>
+          <p style={{ ...styles.questionText, marginTop: problem.imageUrl ? '1rem' : 0 }}>
             {problem.question}
           </p>
         </div>
@@ -310,8 +316,8 @@ export default function QuizPlay(): React.ReactElement {
         {/* 보기 목록 또는 주관식 입력 */}
         {problem.format === 'SHORT_ANSWER' ? (
           <form onSubmit={handleSubmitShortAnswer} style={styles.shortAnswerForm}>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={shortAnswerText}
               onChange={(e) => setShortAnswerText(e.target.value)}
               disabled={answerState !== 'idle'}
@@ -321,8 +327,8 @@ export default function QuizPlay(): React.ReactElement {
                 borderColor: answerState === 'correct' ? '#34d399' : answerState === 'wrong' ? '#f87171' : 'rgba(255,255,255,0.2)'
               }}
             />
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={answerState !== 'idle' || !shortAnswerText.trim()}
               style={{
                 ...styles.shortAnswerSubmitBtn,
@@ -339,9 +345,9 @@ export default function QuizPlay(): React.ReactElement {
             {problem.options.map((opt, idx) => {
               // Determine color
               let border = 'rgba(255,255,255,0.1)';
-              let bg     = 'rgba(255,255,255,0.04)';
-              let color  = '#e0e7ff';
-  
+              let bg = 'rgba(255,255,255,0.04)';
+              let color = '#e0e7ff';
+
               if (selectedOpt === idx) {
                 if (quizType === 'PRACTICE') {
                   if (answerState === 'correct') {
@@ -365,7 +371,7 @@ export default function QuizPlay(): React.ReactElement {
               ) {
                 border = '#34d399'; bg = '#34d39911'; color = '#34d399';
               }
-  
+
               return (
                 <button
                   key={idx}
@@ -390,12 +396,12 @@ export default function QuizPlay(): React.ReactElement {
               ...styles.feedbackBanner,
               background: answerState === 'correct' ? '#34d39922' : '#f8717122',
               borderColor: answerState === 'correct' ? '#34d399' : '#f87171',
-              color:       answerState === 'correct' ? '#34d399' : '#f87171',
+              color: answerState === 'correct' ? '#34d399' : '#f87171',
             }}
           >
             {answerState === 'correct' ? '🎉 정답입니다!' : '❌ 오답입니다.'}
             {answerState === 'wrong' && problem.format === 'SHORT_ANSWER' && problem.answer && (
-              <span style={{marginLeft: '8px', color: '#e0e7ff'}}>정답: {problem.answer}</span>
+              <span style={{ marginLeft: '8px', color: '#e0e7ff' }}>정답: {problem.answer}</span>
             )}
           </div>
         )}
@@ -411,9 +417,9 @@ export default function QuizPlay(): React.ReactElement {
           </span>
         </div>
 
-      <footer style={styles.footer}>
-        © 2026 맞공(maj.gong) — WJW06
-      </footer>
+        <footer style={styles.footer}>
+          © 2026 맞공(maj.gong) — WJW06
+        </footer>
       </div>
     </div>
   );
@@ -493,10 +499,10 @@ const styles: Record<string, CSSProperties> = {
   },
 
   // ── Options
-  optionsGrid: { 
-    display: 'grid', 
-    gridTemplateColumns: '1fr 1fr', 
-    gap: '0.75rem' 
+  optionsGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '0.75rem'
   },
   optionBtn: {
     display: 'flex', alignItems: 'center', gap: '0.9rem',
@@ -526,7 +532,7 @@ const styles: Record<string, CSSProperties> = {
     fontWeight: '700', fontSize: '0.95rem',
   },
   shortAnswerForm: {
-    display: 'flex', gap: '8px', 
+    display: 'flex', gap: '8px',
     flexDirection: 'column',
     width: '100%',
   },
@@ -607,7 +613,7 @@ const styles: Record<string, CSSProperties> = {
   statLabel: { fontSize: '0.75rem', color: '#64748b' },
   statDivider: { width: '1px', height: '36px', background: 'rgba(255,255,255,0.07)' },
   savingText: { fontSize: '0.85rem', color: '#94a3b8', margin: 0 },
-  savedText:  { fontSize: '0.85rem', color: '#34d399', margin: 0, fontWeight: '600' },
+  savedText: { fontSize: '0.85rem', color: '#34d399', margin: 0, fontWeight: '600' },
   resultBtns: {
     display: 'grid', gridTemplateColumns: '1fr 1fr',
     gap: '0.75rem', width: '100%', marginTop: '0.5rem',
