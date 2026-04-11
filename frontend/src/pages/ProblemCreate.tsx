@@ -7,7 +7,7 @@ import { useSubjects, useRanges, createProblem, ProblemCreateRequest } from '../
 // ── Component ────────────────────────────────────────────
 export default function ProblemCreate(): React.ReactElement {
   const navigate = useNavigate();
-  const { user, token } = useAuthStore();
+  const { user } = useAuthStore();
 
   // Check admin authority (rejected at rendering level)
   if (user?.email !== 'majgong@manager.com') {
@@ -39,7 +39,7 @@ export default function ProblemCreate(): React.ReactElement {
 
   // ── Problem Creation Mutation
   const { mutate: submitProblem, isPending } = useMutation({
-    mutationFn: (data: ProblemCreateRequest) => createProblem(token, data),
+    mutationFn: (data: ProblemCreateRequest) => createProblem(data),
     onSuccess: () => {
       alert('문제가 성공적으로 생성되었습니다.');
       navigate('/main');

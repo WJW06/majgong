@@ -42,7 +42,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public AuthDto.LoginResponse login(AuthDto.LoginRequest request) {
+    public AuthDto.LoginResult login(AuthDto.LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
 
@@ -60,7 +60,7 @@ public class AuthService {
                 .totalScore(user.getTotalScore())
                 .build();
 
-        return AuthDto.LoginResponse.builder()
+        return AuthDto.LoginResult.builder()
                 .token(token)
                 .user(userInfo)
                 .build();

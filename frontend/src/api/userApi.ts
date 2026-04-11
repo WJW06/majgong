@@ -10,10 +10,10 @@ interface ApiErrorResponse {
 }
 
 // My Information Lookup API Function
-export const fetchMe = async (token: string | null): Promise<User> => {
+export const fetchMe = async (): Promise<User> => {
   const res = await fetch(`${API_BASE}/users/me`, {
+    credentials: 'include',
     headers: {
-      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
   });
@@ -26,14 +26,21 @@ export const fetchMe = async (token: string | null): Promise<User> => {
   return res.json() as Promise<User>;
 };
 
+export const logoutApi = async (): Promise<void> => {
+  await fetch(`${API_BASE}/auth/logout`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+};
+
 // React Query custom hook: Lookup my information
 export const useMe = (): UseQueryResult<User, Error> => {
-  const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
 
   return useQuery<User, Error>({
     queryKey: ['me'],
-    queryFn: () => fetchMe(token),
-    enabled: !!token, // Execute only when a token exists
+    queryFn: () => fetchMe(),
+    enabled: !!user, // Execute only when a user exists
     staleTime: 1000 * 60 * 5,
     retry: 1,
   });

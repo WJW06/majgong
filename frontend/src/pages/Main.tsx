@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useMe } from '../api/userApi';
+import { useMe, logoutApi } from '../api/userApi';
 import useAuthStore from '../store/useAuthStore';
 import type { CSSProperties } from 'react';
 
@@ -102,7 +102,12 @@ export default function Main(): React.ReactElement {
         ]
       : ACTIONS;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } catch (e) {
+      console.error("Failed to call logout API", e);
+    }
     clearAuth();
     queryClient.clear();
     navigate('/login', { replace: true });

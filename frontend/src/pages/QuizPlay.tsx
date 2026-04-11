@@ -36,7 +36,6 @@ export default function QuizPlay(): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState | null;
-  const token = useAuthStore((s) => s.token);
 
   const savedSession = React.useMemo(() => {
     try {
@@ -119,7 +118,7 @@ export default function QuizPlay(): React.ReactElement {
     Error,
     ScoreSubmitRequest
   >({
-    mutationFn: (body) => submitScore(token, body),
+    mutationFn: (body) => submitScore(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['me'] });
       queryClient.invalidateQueries({ queryKey: ['ranking'] });

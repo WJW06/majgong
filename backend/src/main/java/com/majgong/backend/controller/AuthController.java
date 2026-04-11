@@ -3,6 +3,8 @@ package com.majgong.backend.controller;
 import com.majgong.backend.dto.AuthDto;
 import com.majgong.backend.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,14 +37,38 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthDto.LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody AuthDto.LoginRequest request, HttpServletResponse httpServletResponse) {
         try {
-            AuthDto.LoginResponse response = authService.login(request);
+            AuthDto.LoginResult result = authService.login(request);
+
+            ResponseCookie cookie = ResponseCookie.from("accessToken", result.getToken())
+                    .httpOnly(true)
+                    .path("/")
+                    .maxAge(60 * 60 * 24)
+                    .build();
+            httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+            AuthDto.LoginResponse response = AuthDto.LoginResponse.builder()
+                    .user(result.getUser())
+                    .build();
+
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(Collections.singletonMap("message", e.getMessage()));
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse httpServletResponse) {
+        ResponseCookie cookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0) // Expire immediately
+                .build();
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.ok(Collections.singletonMap("message", "로그아웃 되었습니다."));
     }
 
     /**

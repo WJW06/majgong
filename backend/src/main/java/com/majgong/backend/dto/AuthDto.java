@@ -26,13 +26,21 @@ public class AuthDto {
         private String password;
     }
 
-    /** 프론트엔드가 기대하는 로그인 응답: { token, user } */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class LoginResult { // Internal use
+        private String token;
+        private UserInfo user;
+    }
+
+    /** 프론트엔드가 기대하는 로그인 응답: { user } */
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     public static class LoginResponse {
-        private String token;
         private UserInfo user;
     }
 

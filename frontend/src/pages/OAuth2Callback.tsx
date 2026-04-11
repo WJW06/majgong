@@ -10,19 +10,11 @@ export default function OAuth2Callback(): React.ReactElement {
   const [errorMSG, setErrorMSG] = useState('');
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const token = params.get('token');
-
-    if (!token) {
-      setErrorMSG('인증 토큰을 찾을 수 없습니다.');
-      setTimeout(() => navigate('/login', { replace: true }), 2000);
-      return;
-    }
-
-    // Retrieve user information using the received token
-    fetchMe(token)
+    // The backend has successfully set the HttpOnly cookie for the token,
+    // so we can immediately request the user information using the cookie.
+    fetchMe()
       .then((user) => {
-        setAuth(user, token);
+        setAuth(user);
         navigate('/main', { replace: true });
       })
       .catch((err) => {
@@ -30,7 +22,7 @@ export default function OAuth2Callback(): React.ReactElement {
         setErrorMSG('로그인 유저 정보를 불러오는 데 실패했습니다.');
         setTimeout(() => navigate('/login', { replace: true }), 2000);
       });
-  }, [location, navigate, setAuth]);
+  }, [navigate, setAuth]);
 
   return (
     <div style={styles.container}>

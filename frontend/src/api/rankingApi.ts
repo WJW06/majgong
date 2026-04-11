@@ -32,12 +32,12 @@ const MOCK_RANKING: RankingEntry[] = [
 
 // ── API function ───────────────────────────────────────────
 
-export const fetchRanking = async (token: string | null): Promise<RankingEntry[]> => {
+export const fetchRanking = async (): Promise<RankingEntry[]> => {
   if (USE_MOCK) return Promise.resolve(MOCK_RANKING);
 
   const res = await fetch(`${API_BASE}/ranking`, {
+    credentials: 'include',
     headers: {
-      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
   });
@@ -51,11 +51,11 @@ export const fetchRanking = async (token: string | null): Promise<RankingEntry[]
 // ── React Query custom hook ──────────────────────────────
 
 export const useRanking = (): UseQueryResult<RankingEntry[], Error> => {
-  const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
   return useQuery<RankingEntry[], Error>({
     queryKey: ['ranking'],
-    queryFn: () => fetchRanking(token),
-    enabled: USE_MOCK || !!token,
+    queryFn: () => fetchRanking(),
+    enabled: USE_MOCK || !!user,
     staleTime: 1000 * 60 * 2,
   });
 };

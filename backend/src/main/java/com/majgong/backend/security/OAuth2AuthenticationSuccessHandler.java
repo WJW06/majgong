@@ -23,9 +23,15 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String token = jwtProvider.generateToken(authentication);
         
+        org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from("accessToken", token)
+                .httpOnly(true)
+                .path("/")
+                .maxAge(60 * 60 * 24)
+                .build();
+        response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString());
+
         // Redirect back to frontend
         String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/oauth2/callback")
-                .queryParam("token", token)
                 .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);

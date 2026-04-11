@@ -39,7 +39,6 @@ const COUNT_OPTIONS: CountOption[] = [
 
 export default function QuizSetting(): React.ReactElement {
   const navigate = useNavigate();
-  const token = useAuthStore((s) => s.token);
 
   // ── Selection State
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
@@ -60,7 +59,7 @@ export default function QuizSetting(): React.ReactElement {
     Error,
     QuizStartRequest
   >({
-    mutationFn: (body) => startQuiz(token, body),
+    mutationFn: (body) => startQuiz(body),
     onSuccess: (data) => {
       if (data.problems.length === 0) {
         alert('선택한 조건에 해당하는 문제가 없습니다. 다른 설정을 선택해 주세요.');

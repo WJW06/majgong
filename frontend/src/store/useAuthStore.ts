@@ -12,9 +12,8 @@ export interface User {
 
 interface AuthState {
   user: User | null;      // Logged-in user information
-  token: string | null;   // JWT access token
 
-  setAuth: (user: User, token: string) => void;
+  setAuth: (user: User) => void;
   setUser: (user: User) => void;
   clearAuth: () => void;
 }
@@ -24,11 +23,10 @@ const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      token: null,
 
-      setAuth: (user, token) => set({ user, token }),
+      setAuth: (user) => set({ user }),
       setUser: (user) => set({ user }),
-      clearAuth: () => set({ user: null, token: null }),
+      clearAuth: () => set({ user: null }),
     }),
     {
       name: 'majgong-auth', // localStorage key

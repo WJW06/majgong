@@ -58,11 +58,11 @@ export interface QuizStartResponse {
 
 // ── API function ───────────────────────────────────────────
 
-async function authFetch<T>(url: string, token: string | null, options?: RequestInit): Promise<T> {
+async function authFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
     ...options,
+    credentials: 'include',
     headers: {
-      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
       ...(options?.headers ?? {}),
     },
@@ -113,26 +113,26 @@ const MOCK_RANGES: Record<number, ProblemRange[]> = {
 };
 
 /** Fetch subject list */
-export const fetchSubjects = (token: string | null): Promise<Subject[]> => {
+export const fetchSubjects = (): Promise<Subject[]> => {
   if (USE_MOCK) return Promise.resolve(MOCK_SUBJECTS);
-  return authFetch<Subject[]>(`${API_BASE}/problems/subjects`, token);
+  return authFetch<Subject[]>(`${API_BASE}/problems/subjects`);
 };
 
 /** Fetch range list (Based on Subject ID) */
-export const fetchRanges = (token: string | null, subjectId: number): Promise<ProblemRange[]> => {
+export const fetchRanges = (subjectId: number): Promise<ProblemRange[]> => {
   if (USE_MOCK) return Promise.resolve(MOCK_RANGES[subjectId] ?? []);
-  return authFetch<ProblemRange[]>(`${API_BASE}/problems/ranges?subject=${subjectId}`, token);
+  return authFetch<ProblemRange[]>(`${API_BASE}/problems/ranges?subject=${subjectId}`);
 };
 
 /** Fetch problem count */
-export const fetchProblemCount = (token: string | null, rangeId: number, difficulty: string, format: string): Promise<number> => {
+export const fetchProblemCount = (rangeId: number, difficulty: string, format: string): Promise<number> => {
   if (USE_MOCK) return Promise.resolve(15);
-  return authFetch<number>(`${API_BASE}/problems/count?rangeId=${rangeId}&difficulty=${difficulty}&format=${format}`, token);
+  return authFetch<number>(`${API_BASE}/problems/count?rangeId=${rangeId}&difficulty=${difficulty}&format=${format}`);
 };
 
 /** Start quiz (Returns problem list) */
-export const startQuiz = (token: string | null, body: QuizStartRequest) =>
-  authFetch<QuizStartResponse>(`${API_BASE}/problems/quiz`, token, {
+export const startQuiz = (body: QuizStartRequest) =>
+  authFetch<QuizStartResponse>(`${API_BASE}/problems/quiz`, {
     method: 'POST',
     body: JSON.stringify(body),
   });
@@ -155,11 +155,11 @@ export interface ScoreSubmitResponse {
 }
 
 /** Submit score */
-export const submitScore = (token: string | null, body: ScoreSubmitRequest): Promise<ScoreSubmitResponse> => {
+export const submitScore = (body: ScoreSubmitRequest): Promise<ScoreSubmitResponse> => {
   if (USE_MOCK) {
     return Promise.resolve({ id: 0, score: body.score, message: '점수가 저장되었습니다.' });
   }
-  return authFetch<ScoreSubmitResponse>(`${API_BASE}/scores`, token, {
+  return authFetch<ScoreSubmitResponse>(`${API_BASE}/scores`, {
     method: 'POST',
     body: JSON.stringify(body),
   });
@@ -169,40 +169,40 @@ export const submitScore = (token: string | null, body: ScoreSubmitRequest): Pro
 
 /** Subject list hook */
 export const useSubjects = (): UseQueryResult<Subject[], Error> => {
-  const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
   return useQuery<Subject[], Error>({
     queryKey: ['subjects'],
-    queryFn: () => fetchSubjects(token),
-    enabled: USE_MOCK || !!token,
+    queryFn: () => fetchSubjects(),
+    enabled: USE_MOCK || !!user,
     staleTime: 1000 * 60 * 10,
   });
 };
 
 /** Range list hook (Active when subject is selected) */
 export const useRanges = (subjectId: number | null): UseQueryResult<ProblemRange[], Error> => {
-  const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
   return useQuery<ProblemRange[], Error>({
     queryKey: ['ranges', subjectId],
-    queryFn: () => fetchRanges(token, subjectId!),
-    enabled: (USE_MOCK || !!token) && subjectId !== null,
+    queryFn: () => fetchRanges(subjectId!),
+    enabled: (USE_MOCK || !!user) && subjectId !== null,
     staleTime: 1000 * 60 * 10,
   });
 };
 
 /** Problem count lookup hook */
 export const useProblemCount = (rangeId: number | null, difficulty: string, format: string): UseQueryResult<number, Error> => {
-  const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
   return useQuery<number, Error>({
     queryKey: ['problemCount', rangeId, difficulty, format],
-    queryFn: () => fetchProblemCount(token, rangeId!, difficulty, format),
-    enabled: !!token && rangeId !== null,
+    queryFn: () => fetchProblemCount(rangeId!, difficulty, format),
+    enabled: !!user && rangeId !== null,
     staleTime: 1000 * 60 * 5,
   });
 };
 
 /** Create problem */
-export const createProblem = (token: string | null, data: ProblemCreateRequest): Promise<void> => {
-  return authFetch<void>(`${API_BASE}/problems/create`, token, {
+export const createProblem = (data: ProblemCreateRequest): Promise<void> => {
+  return authFetch<void>(`${API_BASE}/problems/create`, {
     method: 'POST',
     body: JSON.stringify(data),
   });
