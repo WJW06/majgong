@@ -30,35 +30,73 @@ function calcScore(type: 'PRACTICE' | 'EXAM', total: number, correct: number, wr
 }
 
 // ── Component ────────────────────────────────────────────
+const QUIZ_SESSION_KEY = 'majgong_quiz_session';
+
 export default function QuizPlay(): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState | null;
   const token = useAuthStore((s) => s.token);
 
+  const savedSession = React.useMemo(() => {
+    try {
+      const saved = sessionStorage.getItem(QUIZ_SESSION_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return null;
+  }, []);
+
+  const validData = savedSession || state;
+
   // Redirect if accessed directly without going through setting page
   useEffect(() => {
-    if (!state?.quizData) navigate('/quiz/setting', { replace: true });
-  }, [state, navigate]);
+    if (!validData?.quizData) navigate('/quiz/setting', { replace: true });
+  }, [validData, navigate]);
 
-  const { quizData, quizType } = state ?? {
+  const { quizData, quizType } = validData ?? {
     quizData: { quizId: 0, problems: [] },
     quizType: 'PRACTICE' as const,
   };
   const problems: QuizProblem[] = quizData.problems;
 
   // ── Quiz Progress State
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [selectedOpt, setSelectedOpt] = useState<number | null>(null);
-  const [answerState, setAnswerState] = useState<AnswerState>('idle');
-  const [correctCount, setCorrectCount] = useState(0);
-  const [wrongCount, setWrongCount] = useState(0);
-  const [elapsed, setElapsed] = useState(0); // Seconds
-  const [isFinished, setIsFinished] = useState(false);
+  const [currentIdx, setCurrentIdx] = useState(savedSession?.currentIdx ?? 0);
+  const [selectedOpt, setSelectedOpt] = useState<number | null>(savedSession?.selectedOpt ?? null);
+  const [answerState, setAnswerState] = useState<AnswerState>(savedSession?.answerState ?? 'idle');
+  const [correctCount, setCorrectCount] = useState(savedSession?.correctCount ?? 0);
+  const [wrongCount, setWrongCount] = useState(savedSession?.wrongCount ?? 0);
+  const [elapsed, setElapsed] = useState(savedSession?.elapsed ?? 0); // Seconds
+  const [isFinished, setIsFinished] = useState(savedSession?.isFinished ?? false);
   const [userAnswers, setUserAnswers] = useState<(number | null)[]>(
-    Array(problems.length).fill(null)
+    savedSession?.userAnswers ?? Array(problems.length || 0).fill(null)
   );
-  const [shortAnswerText, setShortAnswerText] = useState('');
+  const [shortAnswerText, setShortAnswerText] = useState(savedSession?.shortAnswerText ?? '');
+
+  // Session saving effect
+  useEffect(() => {
+    if (!validData?.quizData || answerState !== 'idle') return;
+    const sessionData = {
+      quizData,
+      quizType,
+      count: validData.count,
+      subjectName: validData.subjectName,
+      rangeName: validData.rangeName,
+      difficultyLabel: validData.difficultyLabel,
+      currentIdx,
+      selectedOpt,
+      answerState,
+      correctCount,
+      wrongCount,
+      elapsed,
+      isFinished,
+      userAnswers,
+      shortAnswerText,
+    };
+    sessionStorage.setItem(QUIZ_SESSION_KEY, JSON.stringify(sessionData));
+  }, [
+    validData, quizData, quizType, currentIdx, selectedOpt, answerState, correctCount, 
+    wrongCount, elapsed, isFinished, userAnswers, shortAnswerText
+  ]);
 
   // ── Timer
   useEffect(() => {
@@ -207,7 +245,7 @@ export default function QuizPlay(): React.ReactElement {
 
             <h2 style={styles.resultTitle}>퀴즈 완료!</h2>
             <p style={styles.resultSub}>
-              {quizType === 'PRACTICE' ? '연습문제' : '실전문제'} · {state?.subjectName} · {state?.rangeName} · {state?.difficultyLabel} · {formatTime(elapsed)}
+              {quizType === 'PRACTICE' ? '연습문제' : '실전문제'} · {validData?.subjectName} · {validData?.rangeName} · {validData?.difficultyLabel} · {formatTime(elapsed)}
             </p>
 
             {/* Score Highlight */}

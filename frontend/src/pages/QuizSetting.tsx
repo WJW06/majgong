@@ -23,16 +23,16 @@ interface CountOption {
 }
 
 const DIFFICULTY_OPTIONS: DifficultyOption[] = [
-  { value: 'LOW',    label: '하',  emoji: '🌱', color: '#34d399' },
-  { value: 'MEDIUM', label: '중',  emoji: '📘', color: '#60a5fa' },
-  { value: 'HIGH',   label: '상',  emoji: '🔥', color: '#f43f5e' },
+  { value: 'LOW', label: '하', emoji: '🌱', color: '#34d399' },
+  { value: 'MEDIUM', label: '중', emoji: '📘', color: '#60a5fa' },
+  { value: 'HIGH', label: '상', emoji: '🔥', color: '#f43f5e' },
 ];
 
 const COUNT_OPTIONS: CountOption[] = [
   { value: 10, label: '10문제' },
   { value: 20, label: '20문제' },
   { value: 30, label: '30문제' },
-  { value: 50,  label: '50문제'  },
+  { value: 50, label: '50문제' },
 ];
 
 // ── Component ────────────────────────────────────────────
@@ -43,16 +43,16 @@ export default function QuizSetting(): React.ReactElement {
 
   // ── Selection State
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
-  const [selectedRangeId,   setSelectedRangeId]   = useState<number | null>(null);
-  const [difficulty,        setDifficulty]         = useState<Difficulty>('MEDIUM');
-  const [count,             setCount]             = useState<number>(10);
-  const [quizType,          setQuizType]          = useState<QuizType>('PRACTICE');
-  const [format,            setFormat]            = useState<'MULTIPLE_CHOICE' | 'SHORT_ANSWER'>('MULTIPLE_CHOICE');
+  const [selectedRangeId, setSelectedRangeId] = useState<number | null>(null);
+  const [difficulty, setDifficulty] = useState<Difficulty>('MEDIUM');
+  const [count, setCount] = useState<number>(10);
+  const [quizType, setQuizType] = useState<QuizType>('PRACTICE');
+  const [format, setFormat] = useState<'MULTIPLE_CHOICE' | 'SHORT_ANSWER'>('MULTIPLE_CHOICE');
 
   // ── API hooks
   const { data: subjects, isLoading: subjectsLoading, isError: subjectsError } = useSubjects();
-  const { data: ranges,   isLoading: rangesLoading }                           = useRanges(selectedSubjectId);
-  const { data: availableCount, isLoading: countLoading }                      = useProblemCount(selectedRangeId, difficulty, format);
+  const { data: ranges, isLoading: rangesLoading } = useRanges(selectedSubjectId);
+  const { data: availableCount, isLoading: countLoading } = useProblemCount(selectedRangeId, difficulty, format);
 
   // ── Quiz Start Mutation
   const { mutate: submitQuiz, isPending, error: submitError } = useMutation<
@@ -70,16 +70,18 @@ export default function QuizSetting(): React.ReactElement {
       const selectedRange = ranges?.find(r => r.id === selectedRangeId);
       const selectedDifficulty = DIFFICULTY_OPTIONS.find(d => d.value === difficulty);
 
+      sessionStorage.removeItem('majgong_quiz_session');
+
       // Move to quiz play page and pass problem data via state
-      navigate('/quiz/play', { 
-        state: { 
-          quizData: data, 
-          quizType, 
+      navigate('/quiz/play', {
+        state: {
+          quizData: data,
+          quizType,
           count,
           subjectName: selectedSubject?.name,
           rangeName: selectedRange?.name,
           difficultyLabel: selectedDifficulty?.label
-        } 
+        }
       });
     },
   });
@@ -193,8 +195,8 @@ export default function QuizSetting(): React.ReactElement {
                         padding: '0.4rem 0.8rem',
                         fontSize: '0.85rem',
                         borderColor: active ? opt.color : 'rgba(255,255,255,0.1)',
-                        background:  active ? opt.color + '22' : 'rgba(255,255,255,0.04)',
-                        color:       active ? opt.color : '#94a3b8',
+                        background: active ? opt.color + '22' : 'rgba(255,255,255,0.04)',
+                        color: active ? opt.color : '#94a3b8',
                       }}
                       onClick={() => setDifficulty(opt.value)}
                     >
@@ -214,8 +216,8 @@ export default function QuizSetting(): React.ReactElement {
                     padding: '0.4rem 0.8rem',
                     fontSize: '0.85rem',
                     borderColor: format === 'MULTIPLE_CHOICE' ? '#a78bfa' : 'rgba(255,255,255,0.1)',
-                    background:  format === 'MULTIPLE_CHOICE' ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
-                    color:       format === 'MULTIPLE_CHOICE' ? '#a78bfa' : '#94a3b8',
+                    background: format === 'MULTIPLE_CHOICE' ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
+                    color: format === 'MULTIPLE_CHOICE' ? '#a78bfa' : '#94a3b8',
                   }}
                   onClick={() => setFormat('MULTIPLE_CHOICE')}
                 >
@@ -227,8 +229,8 @@ export default function QuizSetting(): React.ReactElement {
                     padding: '0.4rem 0.8rem',
                     fontSize: '0.85rem',
                     borderColor: format === 'SHORT_ANSWER' ? '#a78bfa' : 'rgba(255,255,255,0.1)',
-                    background:  format === 'SHORT_ANSWER' ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
-                    color:       format === 'SHORT_ANSWER' ? '#a78bfa' : '#94a3b8',
+                    background: format === 'SHORT_ANSWER' ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
+                    color: format === 'SHORT_ANSWER' ? '#a78bfa' : '#94a3b8',
                   }}
                   onClick={() => setFormat('SHORT_ANSWER')}
                 >
@@ -252,8 +254,8 @@ export default function QuizSetting(): React.ReactElement {
                     style={{
                       ...styles.chip,
                       borderColor: active ? '#a78bfa' : 'rgba(255,255,255,0.1)',
-                      background:  active ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
-                      color:       active ? '#a78bfa' : '#94a3b8',
+                      background: active ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
+                      color: active ? '#a78bfa' : '#94a3b8',
                     }}
                     onClick={() => setCount(opt.value)}
                   >
@@ -280,7 +282,7 @@ export default function QuizSetting(): React.ReactElement {
                 style={{
                   ...styles.typeCard,
                   borderColor: quizType === 'PRACTICE' ? '#34d399' : 'rgba(255,255,255,0.08)',
-                  background:  quizType === 'PRACTICE' ? '#34d39911' : 'rgba(255,255,255,0.03)',
+                  background: quizType === 'PRACTICE' ? '#34d39911' : 'rgba(255,255,255,0.03)',
                 }}
                 onClick={() => setQuizType('PRACTICE')}
               >
@@ -297,7 +299,7 @@ export default function QuizSetting(): React.ReactElement {
                 style={{
                   ...styles.typeCard,
                   borderColor: quizType === 'EXAM' ? '#f43f5e' : 'rgba(255,255,255,0.08)',
-                  background:  quizType === 'EXAM' ? '#f43f5e11' : 'rgba(255,255,255,0.03)',
+                  background: quizType === 'EXAM' ? '#f43f5e11' : 'rgba(255,255,255,0.03)',
                 }}
                 onClick={() => setQuizType('EXAM')}
               >
@@ -334,7 +336,7 @@ export default function QuizSetting(): React.ReactElement {
             style={{
               ...styles.startBtn,
               opacity: isReady && !isPending ? 1 : 0.45,
-              cursor:  isReady && !isPending ? 'pointer' : 'not-allowed',
+              cursor: isReady && !isPending ? 'pointer' : 'not-allowed',
             }}
             onClick={handleStart}
             disabled={!isReady || isPending}
