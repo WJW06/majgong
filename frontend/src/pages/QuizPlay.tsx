@@ -73,7 +73,7 @@ export default function QuizPlay(): React.ReactElement {
 
   // Session saving effect
   useEffect(() => {
-    if (!validData?.quizData || answerState !== 'idle') return;
+    if (!validData?.quizData) return;
     const sessionData = {
       quizData,
       quizType,
@@ -142,6 +142,17 @@ export default function QuizPlay(): React.ReactElement {
     [quizType, problems.length, quizData.quizId, sendScore]
   );
 
+  // ── Auto-advance Effect
+  useEffect(() => {
+    if (answerState !== 'idle' && !isFinished) {
+      const delay = quizType === 'PRACTICE' ? 1200 : 500;
+      const timer = setTimeout(() => {
+        nextQuestion(userAnswers, correctCount, wrongCount);
+      }, delay);
+      return () => clearTimeout(timer);
+    }
+  }, [answerState, isFinished, quizType, userAnswers, correctCount, wrongCount]);
+
   // ── Option Selection
   const handleSelect = (optIdx: number) => {
     if (answerState !== 'idle') return; // Ignore if already selected
@@ -158,22 +169,16 @@ export default function QuizPlay(): React.ReactElement {
       setAnswerState(isCorrect ? 'correct' : 'wrong');
       if (isCorrect) {
         setCorrectCount((c) => c + 1);
-        setTimeout(() => nextQuestion(newAnswers, correctCount + 1, wrongCount), 1200);
       } else {
         setWrongCount((c) => c + 1);
-        setTimeout(() => nextQuestion(newAnswers, correctCount, wrongCount + 1), 1200);
       }
     } else {
       // Exam: Go to next without feedback
       const isCorrect = problem.answer !== undefined && problem.options[optIdx] === problem.answer;
-      const newCorrect = isCorrect ? correctCount + 1 : correctCount;
-      const newWrong = !isCorrect ? wrongCount + 1 : wrongCount;
-
       setAnswerState(isCorrect ? 'correct' : 'wrong'); // Change state for blocking
 
-      if (isCorrect) setCorrectCount(newCorrect);
-      else setWrongCount(newWrong);
-      setTimeout(() => nextQuestion(newAnswers, newCorrect, newWrong), 500);
+      if (isCorrect) setCorrectCount((c) => c + 1);
+      else setWrongCount((c) => c + 1);
     }
   };
 
@@ -193,21 +198,13 @@ export default function QuizPlay(): React.ReactElement {
       setAnswerState(isCorrect ? 'correct' : 'wrong');
       if (isCorrect) {
         setCorrectCount((c) => c + 1);
-        setTimeout(() => nextQuestion(newAnswers, correctCount + 1, wrongCount), 1200);
       } else {
         setWrongCount((c) => c + 1);
-        setTimeout(() => nextQuestion(newAnswers, correctCount, wrongCount + 1), 1200);
       }
     } else {
-      const isCorrectExam = problem.answer !== undefined && shortAnswerText.trim() === problem.answer.trim();
-      const newCorrect = isCorrectExam ? correctCount + 1 : correctCount;
-      const newWrong = !isCorrectExam ? wrongCount + 1 : wrongCount;
-
-      setAnswerState(isCorrectExam ? 'correct' : 'wrong');
-
-      if (isCorrectExam) setCorrectCount(newCorrect);
-      else setWrongCount(newWrong);
-      setTimeout(() => nextQuestion(newAnswers, newCorrect, newWrong), 500);
+      setAnswerState(isCorrect ? 'correct' : 'wrong');
+      if (isCorrect) setCorrectCount((c) => c + 1);
+      else setWrongCount((c) => c + 1);
     }
   };
 
