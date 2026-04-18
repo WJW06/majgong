@@ -19,6 +19,7 @@ backend/*.jar
 backend/*.war
 backend/mvnw
 backend/mvnw.cmd
+backend/wallet/
 
 # 환경변수 및 설정 파일
 backend/src/main/resources/application.yml
