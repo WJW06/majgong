@@ -31,7 +31,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString());
 
         // Redirect back to frontend
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/oauth2/callback")
+        String targetUrl = UriComponentsBuilder.fromUriString("/oauth2/callback")
                 .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
