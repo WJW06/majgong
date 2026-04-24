@@ -120,7 +120,7 @@ export default function Login(): React.ReactElement {
         <button
           type="button"
           style={styles.googleButton}
-          onClick={() => { window.location.href = '/api/v1/auth/google'; }}
+          onClick={() => { window.location.href = '/oauth2/authorization/google'; }}
         >
           <svg width="18" height="18" viewBox="0 0 48 48" style={{ marginRight: 10, flexShrink: 0 }}>
             <path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.84l6.1-6.1C34.46 3.1 29.5 1 24 1 14.82 1 7.07 6.48 3.68 14.22l7.07 5.49C12.49 13.47 17.82 9.5 24 9.5z"/>
@@ -135,7 +135,7 @@ export default function Login(): React.ReactElement {
         <button
           type="button"
           style={styles.naverButton}
-          onClick={() => { window.location.href = '/api/v1/auth/naver'; }}
+          onClick={() => { window.location.href = '/oauth2/authorization/naver'; }}
         >
           <span style={styles.naverLogo}>N</span>
           Naver로 계속하기
