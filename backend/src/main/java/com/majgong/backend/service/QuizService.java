@@ -68,7 +68,17 @@ public class QuizService {
 
     public QuizStartResponse generateQuiz(QuizStartRequest request) {
         List<Problem> problems;
-        if (request.getFormat() == com.majgong.backend.entity.ProblemFormat.MIXED) {
+        boolean isMixedFormat = request.getFormat() == com.majgong.backend.entity.ProblemFormat.MIXED;
+        boolean isMixedDifficulty = request.getDifficulty() == Difficulty.MIXED;
+
+        if (isMixedDifficulty && isMixedFormat) {
+            problems = problemRepository.findByProblemRangeId(request.getRangeId());
+        } else if (isMixedDifficulty) {
+            problems = problemRepository.findByProblemRangeIdAndFormat(
+                    request.getRangeId(),
+                    request.getFormat()
+            );
+        } else if (isMixedFormat) {
             problems = problemRepository.findByProblemRangeIdAndDifficulty(
                     request.getRangeId(),
                     request.getDifficulty()
@@ -103,7 +113,14 @@ public class QuizService {
     }
 
     public long getProblemCount(Long rangeId, Difficulty difficulty, com.majgong.backend.entity.ProblemFormat format) {
-        if (format == com.majgong.backend.entity.ProblemFormat.MIXED) {
+        boolean isMixedFormat = format == com.majgong.backend.entity.ProblemFormat.MIXED;
+        boolean isMixedDifficulty = difficulty == Difficulty.MIXED;
+
+        if (isMixedDifficulty && isMixedFormat) {
+            return problemRepository.countByProblemRangeId(rangeId);
+        } else if (isMixedDifficulty) {
+            return problemRepository.countByProblemRangeIdAndFormat(rangeId, format);
+        } else if (isMixedFormat) {
             return problemRepository.countByProblemRangeIdAndDifficulty(rangeId, difficulty);
         }
         return problemRepository.countByProblemRangeIdAndDifficultyAndFormat(rangeId, difficulty, format);

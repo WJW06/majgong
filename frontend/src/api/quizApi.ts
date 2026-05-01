@@ -24,7 +24,7 @@ export interface ProblemRange {
 export interface QuizStartRequest {
   subjectId: number;
   rangeId: number;
-  difficulty: 'HIGH' | 'MEDIUM' | 'LOW';
+  difficulty: 'HIGH' | 'MEDIUM' | 'LOW' | 'MIXED';
   count: number;
   type: 'PRACTICE' | 'EXAM';
   format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER' | 'MIXED';
@@ -34,7 +34,7 @@ export interface ProblemCreateRequest {
   subjectId: number;
   rangeId: number;
   format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER';
-  difficulty: 'HIGH' | 'MEDIUM' | 'LOW';
+  difficulty: 'HIGH' | 'MEDIUM' | 'LOW' | 'MIXED';
   imageUrl?: string | null;
   question: string;
   answer: string;

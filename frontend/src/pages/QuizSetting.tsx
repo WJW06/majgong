@@ -7,7 +7,7 @@ import useAuthStore from '../store/useAuthStore';
 
 // ── Constants ────────────────────────────────────────────────
 
-type Difficulty = 'HIGH' | 'MEDIUM' | 'LOW';
+type Difficulty = 'HIGH' | 'MEDIUM' | 'LOW' | 'MIXED';
 type QuizType = 'PRACTICE' | 'EXAM';
 
 interface DifficultyOption {
@@ -26,6 +26,7 @@ const DIFFICULTY_OPTIONS: DifficultyOption[] = [
   { value: 'LOW', label: '하', emoji: '🌱', color: '#34d399' },
   { value: 'MEDIUM', label: '중', emoji: '📘', color: '#60a5fa' },
   { value: 'HIGH', label: '상', emoji: '🔥', color: '#f43f5e' },
+  { value: 'MIXED', label: '혼합', emoji: '🌪️', color: '#a78bfa' },
 ];
 
 const COUNT_OPTIONS: CountOption[] = [
