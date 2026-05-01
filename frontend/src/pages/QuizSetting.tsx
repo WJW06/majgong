@@ -46,7 +46,7 @@ export default function QuizSetting(): React.ReactElement {
   const [difficulty, setDifficulty] = useState<Difficulty>('MEDIUM');
   const [count, setCount] = useState<number>(10);
   const [quizType, setQuizType] = useState<QuizType>('PRACTICE');
-  const [format, setFormat] = useState<'MULTIPLE_CHOICE' | 'SHORT_ANSWER'>('MULTIPLE_CHOICE');
+  const [format, setFormat] = useState<'MULTIPLE_CHOICE' | 'SHORT_ANSWER' | 'MIXED'>('MULTIPLE_CHOICE');
 
   // ── API hooks
   const { data: subjects, isLoading: subjectsLoading, isError: subjectsError } = useSubjects();
@@ -91,8 +91,8 @@ export default function QuizSetting(): React.ReactElement {
   const handleStart = () => {
     if (!isReady) return;
     submitQuiz({
-      subjectId: selectedSubjectId,
-      rangeId: selectedRangeId,
+      subjectId: selectedSubjectId!,
+      rangeId: selectedRangeId!,
       difficulty,
       count,
       type: quizType,
@@ -234,6 +234,19 @@ export default function QuizSetting(): React.ReactElement {
                   onClick={() => setFormat('SHORT_ANSWER')}
                 >
                   주관식
+                </button>
+                <button
+                  style={{
+                    ...styles.chip,
+                    padding: '0.4rem 0.8rem',
+                    fontSize: '0.85rem',
+                    borderColor: format === 'MIXED' ? '#a78bfa' : 'rgba(255,255,255,0.1)',
+                    background: format === 'MIXED' ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
+                    color: format === 'MIXED' ? '#a78bfa' : '#94a3b8',
+                  }}
+                  onClick={() => setFormat('MIXED')}
+                >
+                  혼합
                 </button>
               </div>
             </section>

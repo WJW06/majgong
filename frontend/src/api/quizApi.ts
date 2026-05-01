@@ -27,7 +27,7 @@ export interface QuizStartRequest {
   difficulty: 'HIGH' | 'MEDIUM' | 'LOW';
   count: number;
   type: 'PRACTICE' | 'EXAM';
-  format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER';
+  format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER' | 'MIXED';
 }
 
 export interface ProblemCreateRequest {
@@ -80,7 +80,7 @@ async function authFetch<T>(url: string, options?: RequestInit): Promise<T> {
     }
     throw new Error(message);
   }
-  
+
   const text = await res.text();
   if (!text) return {} as T;
   try {

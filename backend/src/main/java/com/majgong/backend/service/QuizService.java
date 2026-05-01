@@ -67,11 +67,19 @@ public class QuizService {
     }
 
     public QuizStartResponse generateQuiz(QuizStartRequest request) {
-        List<Problem> problems = problemRepository.findByProblemRangeIdAndDifficultyAndFormat(
-                request.getRangeId(),
-                request.getDifficulty(),
-                request.getFormat()
-        );
+        List<Problem> problems;
+        if (request.getFormat() == com.majgong.backend.entity.ProblemFormat.MIXED) {
+            problems = problemRepository.findByProblemRangeIdAndDifficulty(
+                    request.getRangeId(),
+                    request.getDifficulty()
+            );
+        } else {
+            problems = problemRepository.findByProblemRangeIdAndDifficultyAndFormat(
+                    request.getRangeId(),
+                    request.getDifficulty(),
+                    request.getFormat()
+            );
+        }
         Collections.shuffle(problems);
         if (problems.size() > request.getCount()) {
             problems = problems.subList(0, request.getCount());
@@ -95,6 +103,9 @@ public class QuizService {
     }
 
     public long getProblemCount(Long rangeId, Difficulty difficulty, com.majgong.backend.entity.ProblemFormat format) {
+        if (format == com.majgong.backend.entity.ProblemFormat.MIXED) {
+            return problemRepository.countByProblemRangeIdAndDifficulty(rangeId, difficulty);
+        }
         return problemRepository.countByProblemRangeIdAndDifficultyAndFormat(rangeId, difficulty, format);
     }
 }
