@@ -29,6 +29,7 @@ export default function ProblemCreate(): React.ReactElement {
   const [difficulty, setDifficulty] = useState<'HIGH' | 'MEDIUM' | 'LOW'>('MEDIUM');
 
   const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -52,7 +53,7 @@ export default function ProblemCreate(): React.ReactElement {
   });
 
   // ── Submission Handler
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subjectId || !rangeId || !question.trim() || !answer.trim()) {
       alert('필수 항목을 모두 입력해주세요.');
@@ -64,12 +65,43 @@ export default function ProblemCreate(): React.ReactElement {
       return;
     }
 
+    let finalImageUrl = imageUrl.trim() || null;
+
+    if (imageFile) {
+      const selectedSubject = subjects?.find(s => s.id === subjectId);
+      const selectedRange = ranges?.find(r => r.id === rangeId);
+      if (selectedSubject && selectedRange) {
+        const formData = new FormData();
+        formData.append('file', imageFile);
+        formData.append('subjectFolder', selectedSubject.folderName);
+        formData.append('rangeFolder', selectedRange.folderName);
+
+        try {
+          // Use fetch directly for simplicity, or we could add an API function in quizApi.ts
+          const uploadRes = await fetch('/api/v1/problems/upload-image', {
+            method: 'POST',
+            body: formData,
+            // Since credentials 'include' might be needed if upload is secured
+            credentials: 'include',
+          });
+
+          if (!uploadRes.ok) {
+            throw new Error('Image upload failed');
+          }
+          finalImageUrl = await uploadRes.text(); // e.g. "/source/math/numOp/file.png"
+        } catch (err) {
+          alert('이미지 업로드에 실패했습니다. 수동으로 경로를 입력하거나 다시 시도해주세요.');
+          return;
+        }
+      }
+    }
+
     const requestData: ProblemCreateRequest = {
       subjectId,
       rangeId,
       format,
       difficulty,
-      imageUrl: imageUrl.trim() || null,
+      imageUrl: finalImageUrl,
       question: question.trim(),
       answer: answer.trim(),
       options: format === 'MULTIPLE_CHOICE' ? options.map(o => o.trim()) : undefined,
@@ -109,6 +141,8 @@ export default function ProblemCreate(): React.ReactElement {
         alert('과목과 범위를 먼저 선택해주세요.');
         return;
       }
+
+      setImageFile(file);
 
       // Path assembly: /source/{subjectFolder}/{rangeFolder}/{fileName}
       const subjectPart = encodeURIComponent(selectedSubject.folderName);
@@ -220,27 +254,27 @@ export default function ProblemCreate(): React.ReactElement {
               style={{
                 ...styles.dropZone,
                 ...(isDragging ? styles.dropZoneActive : {}),
-                ...(imageUrl ? styles.dropZoneFilled : {})
+                ...(imageUrl || imageFile ? styles.dropZoneFilled : {})
               }}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
             >
-              {imageUrl ? (
+              {(imageUrl || imageFile) ? (
                 <div style={styles.previewContainer}>
-                  <img src={imageUrl} alt="Preview" style={styles.previewImage} onError={(e) => {
+                  <img src={imageFile ? URL.createObjectURL(imageFile) : imageUrl} alt="Preview" style={styles.previewImage} onError={(e) => {
                     (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Image+Not+Found';
                   }} />
                   <div style={styles.previewInfo}>
-                    <p style={styles.previewPath}>{imageUrl}</p>
-                    <button type="button" style={styles.btnReset} onClick={() => setImageUrl('')}>삭제</button>
+                    <p style={styles.previewPath}>{imageFile ? imageFile.name : imageUrl}</p>
+                    <button type="button" style={styles.btnReset} onClick={() => { setImageUrl(''); setImageFile(null); }}>삭제</button>
                   </div>
                 </div>
               ) : (
                 <div style={styles.dropZonePlaceholder}>
                   <span style={styles.dropIcon}>🖼️</span>
                   <p>이미지 파일을 여기에 드래그하여 놓으세요</p>
-                  <p style={styles.dropSubText}>(backend/source 폴더에 저장된 파일명 기준)</p>
+                  <p style={styles.dropSubText}>(문제 생성 시 서버로 자동 업로드됩니다)</p>
                 </div>
               )}
             </div>
@@ -252,6 +286,7 @@ export default function ProblemCreate(): React.ReactElement {
               placeholder="/source/math/E&I/problem1.png"
               value={imageUrl}
               onChange={e => setImageUrl(e.target.value)}
+              disabled={!!imageFile}
             />
 
             <label style={styles.label}>문제 내용</label>
