@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import useAuthStore from '../store/useAuthStore';
 import { useSubjects, useRanges, createProblem, ProblemCreateRequest } from '../api/quizApi';
 
@@ -8,6 +8,7 @@ import { useSubjects, useRanges, createProblem, ProblemCreateRequest } from '../
 export default function ProblemCreate(): React.ReactElement {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const queryClient = useQueryClient();
 
   // Check admin authority (rejected at rendering level)
   if (user?.email !== 'majgong@manager.com') {
@@ -26,7 +27,7 @@ export default function ProblemCreate(): React.ReactElement {
   const [rangeId, setRangeId] = useState<number | null>(null);
   const [format, setFormat] = useState<'MULTIPLE_CHOICE' | 'SHORT_ANSWER'>('MULTIPLE_CHOICE');
   const [difficulty, setDifficulty] = useState<'HIGH' | 'MEDIUM' | 'LOW'>('MEDIUM');
-  
+
   const [imageUrl, setImageUrl] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [question, setQuestion] = useState('');
@@ -41,6 +42,7 @@ export default function ProblemCreate(): React.ReactElement {
   const { mutate: submitProblem, isPending } = useMutation({
     mutationFn: (data: ProblemCreateRequest) => createProblem(data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['problemCount'] });
       alert('문제가 성공적으로 생성되었습니다.');
       navigate('/main');
     },
@@ -56,7 +58,7 @@ export default function ProblemCreate(): React.ReactElement {
       alert('필수 항목을 모두 입력해주세요.');
       return;
     }
-    
+
     if (format === 'MULTIPLE_CHOICE' && options.some(opt => !opt.trim())) {
       alert('객관식 보기를 모두 입력해주세요.');
       return;
@@ -99,7 +101,7 @@ export default function ProblemCreate(): React.ReactElement {
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       const file = files[0];
-      
+
       const selectedSubject = subjects?.find(s => s.id === subjectId);
       const selectedRange = ranges?.find(r => r.id === rangeId);
 
@@ -133,7 +135,7 @@ export default function ProblemCreate(): React.ReactElement {
         </header>
 
         <form onSubmit={handleSubmit} style={styles.formCard}>
-          
+
           {/* Subject & Range Selection */}
           <div style={styles.sectionRow}>
             <div style={styles.flex1}>
@@ -150,7 +152,7 @@ export default function ProblemCreate(): React.ReactElement {
                 {subjects?.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
-            
+
             <div style={styles.flex1}>
               <label style={styles.label}>범위</label>
               <select
@@ -214,9 +216,9 @@ export default function ProblemCreate(): React.ReactElement {
           {/* Problem and Image Input */}
           <section style={styles.sectionColumn}>
             <label style={styles.label}>이미지 첨부 (Drag & Drop)</label>
-            <div 
-              style={{ 
-                ...styles.dropZone, 
+            <div
+              style={{
+                ...styles.dropZone,
                 ...(isDragging ? styles.dropZoneActive : {}),
                 ...(imageUrl ? styles.dropZoneFilled : {})
               }}
@@ -244,20 +246,20 @@ export default function ProblemCreate(): React.ReactElement {
             </div>
 
             <label style={styles.label}>이미지 URL (수동 입력)</label>
-            <input 
-              type="text" 
-              style={styles.input} 
-              placeholder="/source/math/E&I/problem1.png" 
-              value={imageUrl} 
-              onChange={e => setImageUrl(e.target.value)} 
+            <input
+              type="text"
+              style={styles.input}
+              placeholder="/source/math/E&I/problem1.png"
+              value={imageUrl}
+              onChange={e => setImageUrl(e.target.value)}
             />
 
             <label style={styles.label}>문제 내용</label>
-            <textarea 
-              style={styles.textarea} 
-              placeholder="문제를 입력하세요" 
-              value={question} 
-              onChange={e => setQuestion(e.target.value)} 
+            <textarea
+              style={styles.textarea}
+              placeholder="문제를 입력하세요"
+              value={question}
+              onChange={e => setQuestion(e.target.value)}
               rows={2}
             />
           </section>
@@ -288,12 +290,12 @@ export default function ProblemCreate(): React.ReactElement {
             <label style={styles.label}>
               {format === 'MULTIPLE_CHOICE' ? '정답 (객관식 보기 내용과 완전히 동일하게 작성)' : '정답 (직접 입력)'}
             </label>
-            <input 
-              type="text" 
-              style={styles.input} 
-              placeholder="정답이 될 문구를 입력하세요" 
-              value={answer} 
-              onChange={e => setAnswer(e.target.value)} 
+            <input
+              type="text"
+              style={styles.input}
+              placeholder="정답이 될 문구를 입력하세요"
+              value={answer}
+              onChange={e => setAnswer(e.target.value)}
             />
           </section>
 
