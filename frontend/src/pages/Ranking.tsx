@@ -126,7 +126,8 @@ export default function Ranking(): React.ReactElement {
         )}
 
         <footer style={styles.footer}>
-          © 2026 맞공(maj.gong) — WJW06
+          © 2026 맞공(maj.gong) — WJW06<br></br>
+        majgong2026@gmail.com
         </footer>
       </div>
     </div>
