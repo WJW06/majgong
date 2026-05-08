@@ -364,7 +364,7 @@ export default function QuizPlay(): React.ReactElement {
         </div>
 
         {/* 보기 목록 또는 주관식 입력 */}
-        {problem.format === 'SHORT_ANSWER' ? (
+        {(problem.format === 'SHORT_ANSWER' || problem.format === 'MIXED') && (
           <form onSubmit={handleSubmitShortAnswer} style={styles.shortAnswerForm}>
             <input
               type="text"
@@ -390,8 +390,10 @@ export default function QuizPlay(): React.ReactElement {
               제출
             </button>
           </form>
-        ) : (
-          <div style={styles.optionsGrid}>
+        )}
+
+        {(problem.format === 'MULTIPLE_CHOICE' || problem.format === 'MIXED') && (
+          <div style={{ ...styles.optionsGrid, marginTop: problem.format === 'MIXED' ? '1rem' : 0 }}>
             {problem.options.map((opt, idx) => {
               // Determine color
               let border = 'rgba(255,255,255,0.1)';

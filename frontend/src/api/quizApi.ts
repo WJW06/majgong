@@ -24,17 +24,17 @@ export interface ProblemRange {
 export interface QuizStartRequest {
   subjectId: number;
   rangeId: number;
-  difficulty: 'HIGH' | 'MEDIUM' | 'LOW';
+  difficulty: 'HIGH' | 'MEDIUM' | 'LOW' | 'MIXED';
   count: number;
   type: 'PRACTICE' | 'EXAM';
-  format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER';
+  format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER' | 'MIXED';
 }
 
 export interface ProblemCreateRequest {
   subjectId: number;
   rangeId: number;
   format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER';
-  difficulty: 'HIGH' | 'MEDIUM' | 'LOW';
+  difficulty: 'HIGH' | 'MEDIUM' | 'LOW' | 'MIXED';
   imageUrl?: string | null;
   question: string;
   answer: string;
@@ -80,7 +80,7 @@ async function authFetch<T>(url: string, options?: RequestInit): Promise<T> {
     }
     throw new Error(message);
   }
-  
+
   const text = await res.text();
   if (!text) return {} as T;
   try {

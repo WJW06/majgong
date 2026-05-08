@@ -1,5 +1,5 @@
 package com.majgong.backend.entity;
 
 public enum Difficulty {
-    HIGH, MEDIUM, LOW
+    HIGH, MEDIUM, LOW, MIXED
 }

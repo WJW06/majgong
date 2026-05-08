@@ -55,6 +55,37 @@ public class ProblemController {
         return ResponseEntity.ok(quizService.getProblemCount(rangeId, difficulty, format));
     }
 
+    @PostMapping("/upload-image")
+    public ResponseEntity<String> uploadImage(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            @RequestParam("subjectFolder") String subjectFolder,
+            @RequestParam("rangeFolder") String rangeFolder,
+            Principal principal) {
+        if (principal == null || !"majgong@manager.com".equals(principal.getName())) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+        
+        try {
+            String dirPath = "source/" + subjectFolder + "/" + rangeFolder;
+            java.io.File dir = new java.io.File(dirPath);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            
+            String originalFileName = file.getOriginalFilename();
+            // Optional: sanitize filename or add timestamp to avoid collisions
+            String fileName = System.currentTimeMillis() + "_" + originalFileName;
+            
+            java.nio.file.Path filePath = java.nio.file.Paths.get(dirPath, fileName);
+            java.nio.file.Files.copy(file.getInputStream(), filePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            
+            return ResponseEntity.ok("/source/" + subjectFolder + "/" + rangeFolder + "/" + fileName);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR).body("Upload failed");
+        }
+    }
+
     @PostMapping("/check")
     public ResponseEntity<java.util.Map<String, Object>> checkAnswer(@RequestBody CheckAnswerRequest request) {
         System.out.println("checkAnswer called! ProblemId: " + request.getProblemId() + ", UserAnswer: " + request.getUserAnswer());
