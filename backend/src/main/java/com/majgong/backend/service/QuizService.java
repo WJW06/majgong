@@ -82,8 +82,7 @@ public class QuizService {
                     .map(ProblemOption::getText)
                     .collect(Collectors.toList());
 
-            // String answer = request.getType() == QuizType.PRACTICE ? p.getAnswer() : null;
-            String answer = p.getAnswer();
+            String answer = null; // Do not send answer to frontend
 
             return new QuizProblemDto(p.getId(), p.getQuestion(), options, answer, p.getFormat(), p.getImageUrl());
         }).collect(Collectors.toList());
@@ -96,5 +95,22 @@ public class QuizService {
 
     public long getProblemCount(Long rangeId, Difficulty difficulty, com.majgong.backend.entity.ProblemFormat format) {
         return problemRepository.countByProblemRangeIdAndDifficultyAndFormat(rangeId, difficulty, format);
+    }
+
+    public CheckAnswerResponse checkAnswer(CheckAnswerRequest request) {
+        Problem problem = problemRepository.findById(request.getProblemId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Problem ID"));
+                
+        boolean correct = false;
+        String dbAnswer = problem.getAnswer() != null ? problem.getAnswer().trim() : "";
+        String reqAnswer = request.getUserAnswer() != null ? request.getUserAnswer().trim() : "";
+        String actualAnswerText = dbAnswer;
+
+        if (dbAnswer.equalsIgnoreCase(reqAnswer)) {
+            correct = true;
+            actualAnswerText = reqAnswer;
+        }
+        
+        return new CheckAnswerResponse(correct, actualAnswerText);
     }
 }

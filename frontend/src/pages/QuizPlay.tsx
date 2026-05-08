@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, CSSProperties } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { submitScore } from '../api/quizApi';
+import { submitScore, checkAnswer } from '../api/quizApi';
 import type {
   QuizStartResponse,
   QuizProblem,
@@ -70,6 +70,7 @@ export default function QuizPlay(): React.ReactElement {
     savedSession?.userAnswers ?? Array(problems.length || 0).fill(null)
   );
   const [shortAnswerText, setShortAnswerText] = useState(savedSession?.shortAnswerText ?? '');
+  const [isChecking, setIsChecking] = useState(false);
 
   // Session saving effect
   useEffect(() => {
@@ -154,8 +155,9 @@ export default function QuizPlay(): React.ReactElement {
   }, [answerState, isFinished, quizType, userAnswers, correctCount, wrongCount]);
 
   // ── Option Selection
-  const handleSelect = (optIdx: number) => {
-    if (answerState !== 'idle') return; // Ignore if already selected
+  const handleSelect = async (optIdx: number) => {
+    if (answerState !== 'idle' || isChecking) return; // Ignore if already selected
+    setIsChecking(true);
     setSelectedOpt(optIdx);
 
     const problem = problems[currentIdx];
@@ -163,48 +165,62 @@ export default function QuizPlay(): React.ReactElement {
     newAnswers[currentIdx] = optIdx;
     setUserAnswers(newAnswers);
 
-    // Practice: Show immediate answer feedback
-    if (quizType === 'PRACTICE' && problem.answer !== undefined) {
-      const isCorrect = problem.options[optIdx] === problem.answer;
-      setAnswerState(isCorrect ? 'correct' : 'wrong');
-      if (isCorrect) {
-        setCorrectCount((c) => c + 1);
-      } else {
-        setWrongCount((c) => c + 1);
-      }
-    } else {
-      // Exam: Go to next without feedback
-      const isCorrect = problem.answer !== undefined && problem.options[optIdx] === problem.answer;
-      setAnswerState(isCorrect ? 'correct' : 'wrong'); // Change state for blocking
+    try {
+      const res = await checkAnswer({ problemId: problem.id, userAnswer: problem.options[optIdx] });
+      const isCorrect = res.correct;
+      if (res.actualAnswer) problem.answer = res.actualAnswer;
 
-      if (isCorrect) setCorrectCount((c) => c + 1);
-      else setWrongCount((c) => c + 1);
+      if (quizType === 'PRACTICE') {
+        setAnswerState(isCorrect ? 'correct' : 'wrong');
+        if (isCorrect) {
+          setCorrectCount((c) => c + 1);
+        } else {
+          setWrongCount((c) => c + 1);
+        }
+      } else {
+        setAnswerState(isCorrect ? 'correct' : 'wrong'); // Change state for blocking
+
+        if (isCorrect) setCorrectCount((c) => c + 1);
+        else setWrongCount((c) => c + 1);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsChecking(false);
     }
   };
 
-  const handleSubmitShortAnswer = (e: React.FormEvent) => {
+  const handleSubmitShortAnswer = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (answerState !== 'idle' || !shortAnswerText.trim()) return;
+    if (answerState !== 'idle' || !shortAnswerText.trim() || isChecking) return;
+    setIsChecking(true);
 
     const problem = problems[currentIdx];
     const newAnswers = [...userAnswers];
     newAnswers[currentIdx] = null;
     setUserAnswers(newAnswers);
 
-    const isCorrect = problem.answer !== undefined &&
-      shortAnswerText.trim() === problem.answer.trim();
+    try {
+      const res = await checkAnswer({ problemId: problem.id, userAnswer: shortAnswerText.trim() });
+      const isCorrect = res.correct;
+      if (res.actualAnswer) problem.answer = res.actualAnswer;
 
-    if (quizType === 'PRACTICE' && problem.answer !== undefined) {
-      setAnswerState(isCorrect ? 'correct' : 'wrong');
-      if (isCorrect) {
-        setCorrectCount((c) => c + 1);
+      if (quizType === 'PRACTICE') {
+        setAnswerState(isCorrect ? 'correct' : 'wrong');
+        if (isCorrect) {
+          setCorrectCount((c) => c + 1);
+        } else {
+          setWrongCount((c) => c + 1);
+        }
       } else {
-        setWrongCount((c) => c + 1);
+        setAnswerState(isCorrect ? 'correct' : 'wrong');
+        if (isCorrect) setCorrectCount((c) => c + 1);
+        else setWrongCount((c) => c + 1);
       }
-    } else {
-      setAnswerState(isCorrect ? 'correct' : 'wrong');
-      if (isCorrect) setCorrectCount((c) => c + 1);
-      else setWrongCount((c) => c + 1);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsChecking(false);
     }
   };
 
@@ -401,7 +417,7 @@ export default function QuizPlay(): React.ReactElement {
                 quizType === 'PRACTICE' &&
                 answerState === 'wrong' &&
                 problem.answer !== undefined &&
-                problem.options[idx] === problem.answer
+                problem.options[idx].trim() === problem.answer.trim()
               ) {
                 border = '#34d399'; bg = '#34d39911'; color = '#34d399';
               }

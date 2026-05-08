@@ -137,6 +137,22 @@ export const startQuiz = (body: QuizStartRequest) =>
     body: JSON.stringify(body),
   });
 
+export interface CheckAnswerRequest {
+  problemId: number;
+  userAnswer: string;
+}
+
+export interface CheckAnswerResponse {
+  correct: boolean;
+  actualAnswer?: string;
+}
+
+export const checkAnswer = (body: CheckAnswerRequest) =>
+  authFetch<CheckAnswerResponse>(`${API_BASE}/problems/check`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
 /** Score submission request body */
 export interface ScoreSubmitRequest {
   quizId: number;

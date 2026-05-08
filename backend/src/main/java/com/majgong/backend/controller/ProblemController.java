@@ -5,6 +5,8 @@ import com.majgong.backend.dto.quiz.ProblemRangeDto;
 import com.majgong.backend.dto.quiz.QuizStartRequest;
 import com.majgong.backend.dto.quiz.QuizStartResponse;
 import com.majgong.backend.dto.quiz.SubjectDto;
+import com.majgong.backend.dto.quiz.CheckAnswerRequest;
+import com.majgong.backend.dto.quiz.CheckAnswerResponse;
 import com.majgong.backend.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -51,5 +53,17 @@ public class ProblemController {
                                          @RequestParam("difficulty") Difficulty difficulty,
                                          @RequestParam("format") com.majgong.backend.entity.ProblemFormat format) {
         return ResponseEntity.ok(quizService.getProblemCount(rangeId, difficulty, format));
+    }
+
+    @PostMapping("/check")
+    public ResponseEntity<java.util.Map<String, Object>> checkAnswer(@RequestBody CheckAnswerRequest request) {
+        System.out.println("checkAnswer called! ProblemId: " + request.getProblemId() + ", UserAnswer: " + request.getUserAnswer());
+        CheckAnswerResponse response = quizService.checkAnswer(request);
+        System.out.println("Result -> correct: " + response.getCorrect() + ", actualAnswer: " + response.getActualAnswer());
+        
+        java.util.Map<String, Object> map = new java.util.HashMap<>();
+        map.put("correct", response.getCorrect());
+        map.put("actualAnswer", response.getActualAnswer());
+        return ResponseEntity.ok(map);
     }
 }
