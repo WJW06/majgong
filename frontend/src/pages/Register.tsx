@@ -38,6 +38,8 @@ export default function Register(): React.ReactElement {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isNicknameChecked, setIsNicknameChecked] = useState(false);
+  const [checkedNickname, setCheckedNickname] = useState('');
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +53,11 @@ export default function Register(): React.ReactElement {
 
     if (password.length < 6) {
       setError('비밀번호는 6자 이상이어야 합니다.');
+      return;
+    }
+
+    if (!isNicknameChecked || name !== checkedNickname) {
+      setError('닉네임 중복 확인을 해주세요.');
       return;
     }
 
@@ -72,6 +79,33 @@ export default function Register(): React.ReactElement {
     }
   };
 
+  const handleCheckNickname = async () => {
+    if (!name.trim()) {
+      setError('닉네임을 입력해주세요.');
+      return;
+    }
+
+    setError('');
+    setSuccess('');
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/check-nickname?name=${encodeURIComponent(name)}`);
+      const data = await res.json();
+      
+      if (res.ok) {
+        setIsNicknameChecked(true);
+        setCheckedNickname(name);
+        setSuccess(data.message);
+      } else {
+        setIsNicknameChecked(false);
+        setError(data.message || '이미 사용 중인 닉네임입니다.');
+      }
+    } catch (err) {
+      console.error('Check nickname error:', err);
+      setError('닉네임 확인 중 오류가 발생했습니다.');
+    }
+  };
+
   return (
     <div style={styles.page}>
       <div style={styles.bgOrb1} />
@@ -86,14 +120,32 @@ export default function Register(): React.ReactElement {
         <form onSubmit={handleRegister} style={styles.form}>
           <div>
             <label style={styles.label}>닉네임</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              style={styles.input}
-              placeholder="닉네임을 입력해주세요"
-            />
+            <div style={styles.inputGroup}>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (isNicknameChecked && e.target.value !== checkedNickname) {
+                    setIsNicknameChecked(false);
+                  }
+                }}
+                required
+                style={{ ...styles.input, flex: 1 }}
+                placeholder="닉네임을 입력해주세요"
+              />
+              <button
+                type="button"
+                onClick={handleCheckNickname}
+                style={styles.checkButton}
+                disabled={loading}
+              >
+                중복확인
+              </button>
+            </div>
+            {isNicknameChecked && name === checkedNickname && (
+              <p style={styles.checkSuccessText}>사용 가능한 닉네임입니다.</p>
+            )}
           </div>
 
           <div>
@@ -392,6 +444,29 @@ const styles: Record<string, CSSProperties> = {
     color: '#334155',
     fontSize: '0.75rem',
     marginTop: '10px',
+  },
+  inputGroup: {
+    display: 'flex',
+    gap: '8px',
+  },
+  checkButton: {
+    padding: '0 16px',
+    height: '44px',
+    background: 'rgba(255,255,255,0.15)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: '12px',
+    color: '#fff',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'background 0.2s',
+    whiteSpace: 'nowrap',
+  },
+  checkSuccessText: {
+    fontSize: '0.8rem',
+    color: '#86efac',
+    marginTop: '4px',
+    marginLeft: '4px',
   },
 };
 

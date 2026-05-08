@@ -24,6 +24,10 @@ public class AuthService {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
 
+        if (userRepository.findByName(request.getName()).isPresent()) {
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+        }
+
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -64,5 +68,11 @@ public class AuthService {
                 .token(token)
                 .user(userInfo)
                 .build();
+    }
+    @Transactional(readOnly = true)
+    public void checkNickname(String name) {
+        if (userRepository.findByName(name).isPresent()) {
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+        }
     }
 }

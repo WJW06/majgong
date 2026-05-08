@@ -25,6 +25,17 @@ public class AuthController {
         return ResponseEntity.ok("pong");
     }
 
+    @GetMapping("/check-nickname")
+    public ResponseEntity<?> checkNickname(@RequestParam String name) {
+        try {
+            authService.checkNickname(name);
+            return ResponseEntity.ok(Collections.singletonMap("message", "사용 가능한 닉네임입니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Collections.singletonMap("message", e.getMessage()));
+        }
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody AuthDto.RegisterRequest request) {
         try {
