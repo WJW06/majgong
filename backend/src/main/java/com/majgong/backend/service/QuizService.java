@@ -66,6 +66,81 @@ public class QuizService {
                 .collect(Collectors.toList());
     }
 
+    public List<AdminProblemDto> getAdminProblemsByRange(Long rangeId) {
+        return problemRepository.findByProblemRangeIdOrderByIdAsc(rangeId)
+                .stream()
+                .map(p -> {
+                    List<String> options = p.getOptions().stream()
+                            .map(ProblemOption::getText)
+                            .collect(Collectors.toList());
+                    return new AdminProblemDto(
+                            p.getId(),
+                            p.getQuestion(),
+                            options,
+                            p.getAnswer(),
+                            p.getFormat(),
+                            p.getDifficulty(),
+                            p.getImageUrl()
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateRange(Long rangeId, ProblemRangeUpdateRequest request) {
+        com.majgong.backend.entity.ProblemRange range = problemRangeRepository.findById(rangeId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Range ID"));
+        range.setName(request.getName());
+        range.setFolderName(request.getFolderName());
+        problemRangeRepository.save(range);
+    }
+
+    @Transactional
+    public void deleteRange(Long rangeId) {
+        com.majgong.backend.entity.ProblemRange range = problemRangeRepository.findById(rangeId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Range ID"));
+        // First delete all problems belonging to this range
+        List<Problem> problems = problemRepository.findByProblemRangeId(rangeId);
+        problemRepository.deleteAll(problems);
+        // Then delete the range
+        problemRangeRepository.delete(range);
+    }
+
+    @Transactional
+    public void updateProblem(Long problemId, ProblemCreateRequest request) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Problem ID"));
+
+        com.majgong.backend.entity.ProblemRange range = problemRangeRepository.findById(request.getRangeId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Range ID"));
+
+        problem.setQuestion(request.getQuestion());
+        problem.setDifficulty(request.getDifficulty());
+        problem.setFormat(request.getFormat());
+        problem.setImageUrl(request.getImageUrl());
+        problem.setAnswer(request.getAnswer());
+        problem.setProblemRange(range);
+
+        // Update options
+        problem.getOptions().clear();
+        if (request.getFormat() == com.majgong.backend.entity.ProblemFormat.MULTIPLE_CHOICE && request.getOptions() != null) {
+            for (String optText : request.getOptions()) {
+                ProblemOption option = new ProblemOption();
+                option.setText(optText);
+                option.setProblem(problem);
+                problem.getOptions().add(option);
+            }
+        }
+        problemRepository.save(problem);
+    }
+
+    @Transactional
+    public void deleteProblem(Long problemId) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Problem ID"));
+        problemRepository.delete(problem);
+    }
+
     public QuizStartResponse generateQuiz(QuizStartRequest request) {
         List<Problem> problems;
         boolean isMixedFormat = request.getFormat() == com.majgong.backend.entity.ProblemFormat.MIXED;

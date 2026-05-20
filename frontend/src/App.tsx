@@ -8,6 +8,7 @@ import QuizPlay from './pages/QuizPlay';
 import Ranking from './pages/Ranking';
 import OAuth2Callback from './pages/OAuth2Callback';
 import ProblemCreate from './pages/ProblemCreate';
+import ExamRangeManagement from './pages/ExamRangeManagement';
 
 function App(): React.ReactElement {
   return (
@@ -22,6 +23,7 @@ function App(): React.ReactElement {
         <Route path="/quiz/play" element={<QuizPlay />} />
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/problem/create" element={<ProblemCreate />} />
+        <Route path="/admin/exam-range" element={<ExamRangeManagement />} />
       </Routes>
     </BrowserRouter>
   );

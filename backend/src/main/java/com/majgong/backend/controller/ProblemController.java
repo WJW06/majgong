@@ -48,6 +48,50 @@ public class ProblemController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/admin/list")
+    public ResponseEntity<List<com.majgong.backend.dto.quiz.AdminProblemDto>> getAdminProblems(@RequestParam("rangeId") Long rangeId, Principal principal) {
+        if (principal == null || !"majgong@manager.com".equals(principal.getName())) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(quizService.getAdminProblemsByRange(rangeId));
+    }
+
+    @PutMapping("/ranges/{id}")
+    public ResponseEntity<Void> updateRange(@PathVariable("id") Long rangeId, @RequestBody com.majgong.backend.dto.quiz.ProblemRangeUpdateRequest request, Principal principal) {
+        if (principal == null || !"majgong@manager.com".equals(principal.getName())) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+        quizService.updateRange(rangeId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/ranges/{id}")
+    public ResponseEntity<Void> deleteRange(@PathVariable("id") Long rangeId, Principal principal) {
+        if (principal == null || !"majgong@manager.com".equals(principal.getName())) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+        quizService.deleteRange(rangeId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateProblem(@PathVariable("id") Long problemId, @RequestBody ProblemCreateRequest request, Principal principal) {
+        if (principal == null || !"majgong@manager.com".equals(principal.getName())) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+        quizService.updateProblem(problemId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProblem(@PathVariable("id") Long problemId, Principal principal) {
+        if (principal == null || !"majgong@manager.com".equals(principal.getName())) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+        quizService.deleteProblem(problemId);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/count")
     public ResponseEntity<Long> getCount(@RequestParam("rangeId") Long rangeId, 
                                          @RequestParam("difficulty") Difficulty difficulty,

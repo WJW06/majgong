@@ -97,7 +97,7 @@ export default function Main(): React.ReactElement {
   const displayActions = isAdmin 
       ? [
           ACTIONS[0],
-          { id: 'admin_add', label: '문제 추가', desc: '관리자 전용 문제 등록', emoji: '⚙️', to: '/problem/create', primary: true },
+          { id: 'admin_exam_range', label: '시험 범위 관리', desc: '과목 및 시험 범위 관리', emoji: '⚙️', to: '/admin/exam-range', primary: true },
           ...ACTIONS.slice(1)
         ]
       : ACTIONS;

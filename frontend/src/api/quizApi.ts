@@ -223,3 +223,48 @@ export const createProblem = (data: ProblemCreateRequest): Promise<void> => {
     body: JSON.stringify(data),
   });
 };
+
+export interface AdminProblem {
+  id: number;
+  question: string;
+  options: string[];
+  answer: string;
+  format: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER';
+  difficulty: 'HIGH' | 'MEDIUM' | 'LOW';
+  imageUrl?: string | null;
+}
+
+/** Fetch admin problem list (with answers) */
+export const fetchAdminProblems = (rangeId: number): Promise<AdminProblem[]> => {
+  return authFetch<AdminProblem[]>(`${API_BASE}/problems/admin/list?rangeId=${rangeId}`);
+};
+
+/** Update subject range */
+export const updateRange = (rangeId: number, name: string, folderName: string): Promise<void> => {
+  return authFetch<void>(`${API_BASE}/problems/ranges/${rangeId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ name, folderName }),
+  });
+};
+
+/** Delete subject range */
+export const deleteRange = (rangeId: number): Promise<void> => {
+  return authFetch<void>(`${API_BASE}/problems/ranges/${rangeId}`, {
+    method: 'DELETE',
+  });
+};
+
+/** Update problem */
+export const updateProblem = (problemId: number, data: ProblemCreateRequest): Promise<void> => {
+  return authFetch<void>(`${API_BASE}/problems/${problemId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+/** Delete problem */
+export const deleteProblem = (problemId: number): Promise<void> => {
+  return authFetch<void>(`${API_BASE}/problems/${problemId}`, {
+    method: 'DELETE',
+  });
+};

@@ -45,7 +45,7 @@ export default function ProblemCreate(): React.ReactElement {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['problemCount'] });
       alert('문제가 성공적으로 생성되었습니다.');
-      navigate('/main');
+      navigate('/admin/exam-range');
     },
     onError: (err) => {
       alert('문제 생성에 실패했습니다: ' + err.message);
@@ -162,8 +162,8 @@ export default function ProblemCreate(): React.ReactElement {
       <main style={styles.container}>
         {/* Header */}
         <header style={styles.header}>
-          <button style={styles.backBtn} onClick={() => navigate('/main')}>
-            <span style={styles.backIcon}>←</span> 메인
+          <button style={styles.backBtn} onClick={() => navigate('/admin/exam-range')}>
+            <span style={styles.backIcon}>←</span> 뒤로가기
           </button>
           <h1 style={styles.title}>관리자 문제 추가</h1>
         </header>

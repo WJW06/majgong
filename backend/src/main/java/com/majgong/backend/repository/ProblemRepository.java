@@ -22,6 +22,9 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
     @Query("SELECT DISTINCT p FROM Problem p WHERE p.problemRange.id = :rangeId")
     List<Problem> findByProblemRangeId(@Param("rangeId") Long rangeId);
 
+    @Query("SELECT DISTINCT p FROM Problem p WHERE p.problemRange.id = :rangeId ORDER BY p.id ASC")
+    List<Problem> findByProblemRangeIdOrderByIdAsc(@Param("rangeId") Long rangeId);
+
     long countByProblemRangeIdAndDifficultyAndFormat(Long problemRangeId, Difficulty difficulty, com.majgong.backend.entity.ProblemFormat format);
 
     long countByProblemRangeIdAndDifficulty(Long problemRangeId, Difficulty difficulty);
