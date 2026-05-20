@@ -73,7 +73,7 @@ export default function RangeCreate(): React.ReactElement {
           <button style={styles.backBtn} onClick={() => navigate('/admin/exam-range')}>
             <span style={styles.backIcon}>←</span> 뒤로가기
           </button>
-          <h1 style={styles.title}>관리자 범위 추가</h1>
+          <h1 style={styles.title}>범위 추가</h1>
         </header>
 
         <form onSubmit={handleSubmit} style={styles.formCard}>
