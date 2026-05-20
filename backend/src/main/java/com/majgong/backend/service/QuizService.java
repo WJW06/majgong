@@ -87,6 +87,18 @@ public class QuizService {
     }
 
     @Transactional
+    public void createRange(ProblemRangeCreateRequest request) {
+        com.majgong.backend.entity.Subject subject = subjectRepository.findById(request.getSubjectId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Subject ID"));
+        
+        com.majgong.backend.entity.ProblemRange range = new com.majgong.backend.entity.ProblemRange();
+        range.setName(request.getName());
+        range.setFolderName(request.getFolderName());
+        range.setSubject(subject);
+        problemRangeRepository.save(range);
+    }
+
+    @Transactional
     public void updateRange(Long rangeId, ProblemRangeUpdateRequest request) {
         com.majgong.backend.entity.ProblemRange range = problemRangeRepository.findById(rangeId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Range ID"));

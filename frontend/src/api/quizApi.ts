@@ -239,6 +239,14 @@ export const fetchAdminProblems = (rangeId: number): Promise<AdminProblem[]> => 
   return authFetch<AdminProblem[]>(`${API_BASE}/problems/admin/list?rangeId=${rangeId}`);
 };
 
+/** Create subject range */
+export const createRange = (subjectId: number, name: string, folderName: string): Promise<void> => {
+  return authFetch<void>(`${API_BASE}/problems/ranges`, {
+    method: 'POST',
+    body: JSON.stringify({ subjectId, name, folderName }),
+  });
+};
+
 /** Update subject range */
 export const updateRange = (rangeId: number, name: string, folderName: string): Promise<void> => {
   return authFetch<void>(`${API_BASE}/problems/ranges/${rangeId}`, {

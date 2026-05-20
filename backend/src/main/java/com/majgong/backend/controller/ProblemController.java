@@ -56,6 +56,15 @@ public class ProblemController {
         return ResponseEntity.ok(quizService.getAdminProblemsByRange(rangeId));
     }
 
+    @PostMapping("/ranges")
+    public ResponseEntity<Void> createRange(@RequestBody com.majgong.backend.dto.quiz.ProblemRangeCreateRequest request, Principal principal) {
+        if (principal == null || !"majgong@manager.com".equals(principal.getName())) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+        quizService.createRange(request);
+        return ResponseEntity.ok().build();
+    }
+
     @PutMapping("/ranges/{id}")
     public ResponseEntity<Void> updateRange(@PathVariable("id") Long rangeId, @RequestBody com.majgong.backend.dto.quiz.ProblemRangeUpdateRequest request, Principal principal) {
         if (principal == null || !"majgong@manager.com".equals(principal.getName())) {
