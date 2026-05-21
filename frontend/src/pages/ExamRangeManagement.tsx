@@ -427,7 +427,7 @@ export default function ExamRangeManagement(): React.ReactElement {
               type="button"
               style={styles.bottomBtn}
               onClick={() => {
-                navigate('#', { state: { subjectId } });
+                navigate('/admin/range/create', { state: { subjectId } });
               }}
             >
               범위 추가
