@@ -23,7 +23,7 @@ function App(): React.ReactElement {
         <Route path="/quiz/setting" element={<QuizSetting />} />
         <Route path="/quiz/play" element={<QuizPlay />} />
         <Route path="/ranking" element={<Ranking />} />
-        <Route path="/problem/create" element={<ProblemCreate />} />
+        <Route path="/admin/problem/create" element={<ProblemCreate />} />
         <Route path="/admin/exam-range" element={<ExamRangeManagement />} />
         <Route path="/admin/range/create" element={<RangeCreate />} />
       </Routes>

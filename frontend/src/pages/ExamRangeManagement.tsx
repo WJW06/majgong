@@ -435,7 +435,7 @@ export default function ExamRangeManagement(): React.ReactElement {
             <button
               type="button"
               style={styles.bottomBtn}
-              onClick={() => navigate('/problem/create')}
+              onClick={() => navigate('/admin/problem/create')}
             >
               문제 추가
             </button>
