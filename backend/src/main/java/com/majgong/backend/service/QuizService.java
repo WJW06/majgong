@@ -36,10 +36,6 @@ public class QuizService {
         com.majgong.backend.entity.ProblemRange range = problemRangeRepository.findById(request.getRangeId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Range ID"));
 
-        if (problemRepository.existsByQuestion(request.getQuestion())) {
-            throw new IllegalArgumentException("A problem with this question already exists.");
-        }
-
         Problem problem = new Problem();
         problem.setQuestion(request.getQuestion());
         problem.setDifficulty(request.getDifficulty());
