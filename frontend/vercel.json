@@ -5,6 +5,10 @@
       "destination": "http://168.107.10.240:8080/api/$1"
     },
     {
+      "source": "/source/(.*)",
+      "destination": "http://168.107.10.240:8080/source/$1"
+    },
+    {
       "source": "/login/oauth2/(.*)",
       "destination": "http://168.107.10.240:8080/login/oauth2/$1"
     },
@@ -18,3 +22,4 @@
     }
   ]
 }
+
