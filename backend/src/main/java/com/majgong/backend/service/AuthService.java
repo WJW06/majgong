@@ -45,14 +45,39 @@ public class AuthService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(noRollbackFor = IllegalArgumentException.class)
     public AuthDto.LoginResult login(AuthDto.LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+        // 잠금 시간이 설정되어 있고 잠금 기간이 만료된 경우 실패 횟수 초기화
+        if (user.getLockTime() != null && !user.isLocked()) {
+            user.resetLoginFailCount();
+            userRepository.save(user);
         }
+
+        if (user.isLocked()) {
+            java.time.LocalDateTime unlockTime = user.getLockTime().plusHours(1);
+            java.time.Duration remaining = java.time.Duration.between(java.time.LocalDateTime.now(), unlockTime);
+            long minutes = remaining.toMinutes();
+            long seconds = remaining.getSeconds() % 60;
+            throw new IllegalArgumentException(String.format("비밀번호 5회 이상 오류로 인해 로그인이 1시간 동안 제한됩니다. (남은 시간: %d분 %d초)", minutes, seconds));
+        }
+
+        if (user.getPassword() == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            user.incrementLoginFailCount();
+            if (user.getLoginFailCount() >= 5) {
+                user.lock(java.time.LocalDateTime.now());
+                userRepository.save(user);
+                throw new IllegalArgumentException("비밀번호 5회 이상 오류로 인해 로그인이 1시간 동안 제한됩니다.");
+            } else {
+                userRepository.save(user);
+                throw new IllegalArgumentException(String.format("이메일 또는 비밀번호가 올바르지 않습니다. (실패 횟수: %d/5)", user.getLoginFailCount()));
+            }
+        }
+
+        user.resetLoginFailCount();
+        userRepository.save(user);
 
         String token = jwtProvider.generateToken(user.getEmail());
 

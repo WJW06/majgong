@@ -37,6 +37,33 @@ public class User {
     @Column(nullable = false)
     private String role; // e.g. ROLE_USER
 
+    @Column(nullable = true)
+    @Builder.Default
+    private int loginFailCount = 0;
+
+    @Column(nullable = true)
+    private java.time.LocalDateTime lockTime;
+
+    public void incrementLoginFailCount() {
+        this.loginFailCount++;
+    }
+
+    public void resetLoginFailCount() {
+        this.loginFailCount = 0;
+        this.lockTime = null;
+    }
+
+    public void lock(java.time.LocalDateTime lockTime) {
+        this.lockTime = lockTime;
+    }
+
+    public boolean isLocked() {
+        if (this.lockTime == null) {
+            return false;
+        }
+        return java.time.LocalDateTime.now().isBefore(this.lockTime.plusHours(1));
+    }
+
     public void addScore(int score) {
         this.totalScore += score;
         if (this.totalScore < 0) {

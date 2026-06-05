@@ -47,8 +47,8 @@ export default function Login(): React.ReactElement {
       const response = await loginApi({ email, password });
       setAuth(response.user);
       navigate('/main');
-    } catch (err) {
-      setError('로그인 실패: 아이디 또는 비밀번호가 일치하지 않습니다.');
+    } catch (err: any) {
+      setError(err?.message || '로그인 실패: 아이디 또는 비밀번호가 일치하지 않습니다.');
       console.error('Login error:', err);
     } finally {
       setLoading(false);
