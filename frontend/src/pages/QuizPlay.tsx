@@ -235,11 +235,19 @@ export default function QuizPlay(): React.ReactElement {
     }
   };
 
+  const handleStopSolving = () => {
+    const confirmStop = window.confirm("정말 문제 풀기를 그만두시겠습니까? 지금까지 푸신 문제의 점수만 반영하여 제출합니다.");
+    if (confirmStop) {
+      finishQuiz(correctCount, wrongCount);
+    }
+  };
+
   // ── Result Screen ──────────────────────────────────────
   if (isFinished) {
     const totalCount = problems.length;
     const score = calcScore(quizType, totalCount, correctCount, wrongCount);
-    const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+    const solvedCount = correctCount + wrongCount;
+    const accuracy = solvedCount > 0 ? Math.round((correctCount / solvedCount) * 100) : 0;
 
     return (
       <div style={styles.page}>
@@ -257,7 +265,7 @@ export default function QuizPlay(): React.ReactElement {
 
             <h2 style={styles.resultTitle}>퀴즈 완료!</h2>
             <p style={styles.resultSub}>
-              {quizType === 'PRACTICE' ? '연습문제' : '실전문제'} · {validData?.subjectName} · {validData?.rangeName} · {validData?.difficultyLabel} · {formatTime(elapsed)}
+              {quizType === 'PRACTICE' ? '연습문제' : '실전문제'} · {validData?.subjectName} · {validData?.rangeName}
             </p>
 
             {/* Score Highlight */}
@@ -290,10 +298,22 @@ export default function QuizPlay(): React.ReactElement {
 
             {/* Buttons */}
             <div style={styles.resultBtns}>
-              <button style={styles.btnSecondary} onClick={() => navigate('/quiz/setting')}>
+              <button
+                style={styles.btnSecondary}
+                onClick={() => {
+                  sessionStorage.removeItem(QUIZ_SESSION_KEY);
+                  navigate('/quiz/setting');
+                }}
+              >
                 다시 설정
               </button>
-              <button style={styles.btnPrimary} onClick={() => navigate('/main')}>
+              <button
+                style={styles.btnPrimary}
+                onClick={() => {
+                  sessionStorage.removeItem(QUIZ_SESSION_KEY);
+                  navigate('/main');
+                }}
+              >
                 메인으로
               </button>
             </div>
@@ -341,13 +361,20 @@ export default function QuizPlay(): React.ReactElement {
 
         {/* 상단 바 */}
         <div style={styles.topBar}>
-          <span style={styles.questionIdx}>
-            {currentIdx + 1} <span style={styles.questionTotal}>/ {problems.length}</span>
-          </span>
-          <span style={styles.typeBadge}>
-            {quizType === 'PRACTICE' ? '🌿 연습' : '⚔️ 실전'}
-          </span>
-          <span style={styles.timer}>⏱ {formatTime(elapsed)}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', justifySelf: 'start' }}>
+            <span style={styles.questionIdx}>
+              {currentIdx + 1} <span style={styles.questionTotal}>/ {problems.length}</span>
+            </span>
+            <span style={styles.typeBadge}>
+              {quizType === 'PRACTICE' ? '🌿 연습' : '⚔️ 실전'}
+            </span>
+          </div>
+
+          <button style={styles.stopBtn} onClick={handleStopSolving}>
+            그만풀기
+          </button>
+
+          <span style={{ ...styles.timer, justifySelf: 'end' }}>⏱ {formatTime(elapsed)}</span>
         </div>
 
         {/* 진행 바 */}
@@ -513,7 +540,9 @@ const styles: Record<string, CSSProperties> = {
 
   // ── Top Bar
   topBar: {
-    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    display: 'grid',
+    gridTemplateColumns: '1fr auto 1fr',
+    alignItems: 'center',
   },
   questionIdx: { fontSize: '1.3rem', fontWeight: '800', color: '#e0e7ff' },
   questionTotal: { fontSize: '1rem', color: '#64748b', fontWeight: '400' },
@@ -523,6 +552,18 @@ const styles: Record<string, CSSProperties> = {
     background: 'rgba(99,102,241,0.15)',
     border: '1px solid rgba(99,102,241,0.3)',
     borderRadius: '50px', padding: '3px 12px',
+  },
+  stopBtn: {
+    padding: '0.4rem 1.1rem',
+    borderRadius: '8px',
+    background: '#ef4444',
+    border: 'none',
+    color: '#fff',
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    cursor: 'pointer',
+    boxShadow: '0 2px 10px rgba(239, 68, 68, 0.3)',
+    transition: 'all 0.2s',
   },
   timer: { fontSize: '0.95rem', color: '#94a3b8', fontVariantNumeric: 'tabular-nums' },
 
