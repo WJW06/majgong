@@ -180,78 +180,71 @@ export default function QuizSetting(): React.ReactElement {
 
           <div style={styles.divider} />
 
-          {/* 4. Format & Difficulty (One Line) */}
-          <div style={styles.sectionRow}>
-            <section style={{ ...styles.section, flex: 1 }}>
-              <label style={styles.label}>난이도</label>
-              <div style={styles.chipGroup}>
-                {DIFFICULTY_OPTIONS.map((opt) => {
-                  const active = difficulty === opt.value;
-                  return (
-                    <button
-                      key={opt.value}
-                      style={{
-                        ...styles.chip,
-                        padding: '0.4rem 0.8rem',
-                        fontSize: '0.85rem',
-                        borderColor: active ? opt.color : 'rgba(255,255,255,0.1)',
-                        background: active ? opt.color + '22' : 'rgba(255,255,255,0.04)',
-                        color: active ? opt.color : '#94a3b8',
-                      }}
-                      onClick={() => setDifficulty(opt.value)}
-                    >
-                      {opt.emoji} {opt.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
+          {/* 4. Difficulty Selection */}
+          <section style={styles.section}>
+            <label style={styles.label}>난이도</label>
+            <div style={styles.chipGroup}>
+              {DIFFICULTY_OPTIONS.map((opt) => {
+                const active = difficulty === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    style={{
+                      ...styles.chip,
+                      borderColor: active ? opt.color : 'rgba(255,255,255,0.1)',
+                      background: active ? opt.color + '22' : 'rgba(255,255,255,0.04)',
+                      color: active ? opt.color : '#94a3b8',
+                    }}
+                    onClick={() => setDifficulty(opt.value)}
+                  >
+                    {opt.emoji} {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
 
-            <section style={{ ...styles.section, flex: 1 }}>
-              <label style={styles.label}>문제 형식</label>
-              <div style={styles.chipGroup}>
-                <button
-                  style={{
-                    ...styles.chip,
-                    padding: '0.4rem 0.8rem',
-                    fontSize: '0.85rem',
-                    borderColor: format === 'MULTIPLE_CHOICE' ? '#a78bfa' : 'rgba(255,255,255,0.1)',
-                    background: format === 'MULTIPLE_CHOICE' ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
-                    color: format === 'MULTIPLE_CHOICE' ? '#a78bfa' : '#94a3b8',
-                  }}
-                  onClick={() => setFormat('MULTIPLE_CHOICE')}
-                >
-                  객관식
-                </button>
-                <button
-                  style={{
-                    ...styles.chip,
-                    padding: '0.4rem 0.8rem',
-                    fontSize: '0.85rem',
-                    borderColor: format === 'SHORT_ANSWER' ? '#a78bfa' : 'rgba(255,255,255,0.1)',
-                    background: format === 'SHORT_ANSWER' ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
-                    color: format === 'SHORT_ANSWER' ? '#a78bfa' : '#94a3b8',
-                  }}
-                  onClick={() => setFormat('SHORT_ANSWER')}
-                >
-                  주관식
-                </button>
-                <button
-                  style={{
-                    ...styles.chip,
-                    padding: '0.4rem 0.8rem',
-                    fontSize: '0.85rem',
-                    borderColor: format === 'MIXED' ? '#a78bfa' : 'rgba(255,255,255,0.1)',
-                    background: format === 'MIXED' ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
-                    color: format === 'MIXED' ? '#a78bfa' : '#94a3b8',
-                  }}
-                  onClick={() => setFormat('MIXED')}
-                >
-                  혼합
-                </button>
-              </div>
-            </section>
-          </div>
+          <div style={styles.divider} />
+
+          {/* 5. Format Selection */}
+          <section style={styles.section}>
+            <label style={styles.label}>문제 형식</label>
+            <div style={styles.chipGroup}>
+              <button
+                style={{
+                  ...styles.chip,
+                  borderColor: format === 'MULTIPLE_CHOICE' ? '#a78bfa' : 'rgba(255,255,255,0.1)',
+                  background: format === 'MULTIPLE_CHOICE' ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
+                  color: format === 'MULTIPLE_CHOICE' ? '#a78bfa' : '#94a3b8',
+                }}
+                onClick={() => setFormat('MULTIPLE_CHOICE')}
+              >
+                객관식
+              </button>
+              <button
+                style={{
+                  ...styles.chip,
+                  borderColor: format === 'SHORT_ANSWER' ? '#a78bfa' : 'rgba(255,255,255,0.1)',
+                  background: format === 'SHORT_ANSWER' ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
+                  color: format === 'SHORT_ANSWER' ? '#a78bfa' : '#94a3b8',
+                }}
+                onClick={() => setFormat('SHORT_ANSWER')}
+              >
+                주관식
+              </button>
+              <button
+                style={{
+                  ...styles.chip,
+                  borderColor: format === 'MIXED' ? '#a78bfa' : 'rgba(255,255,255,0.1)',
+                  background: format === 'MIXED' ? '#a78bfa22' : 'rgba(255,255,255,0.04)',
+                  color: format === 'MIXED' ? '#a78bfa' : '#94a3b8',
+                }}
+                onClick={() => setFormat('MIXED')}
+              >
+                혼합
+              </button>
+            </div>
+          </section>
 
           <div style={styles.divider} />
 
