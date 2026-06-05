@@ -23,6 +23,14 @@ interface LocationState {
 // ── Answer State ───────────────────────────────────────────
 type AnswerState = 'idle' | 'correct' | 'wrong';
 
+const getDifficultyEmoji = (label?: string) => {
+  if (label === '하') return '🌱';
+  if (label === '중') return '📘';
+  if (label === '상') return '🔥';
+  if (label === '혼합') return '🌪️';
+  return '';
+};
+
 // ── Score Calculation ───────────────────────────────────────
 function calcScore(type: 'PRACTICE' | 'EXAM', total: number, correct: number, wrong: number): number {
   if (type === 'PRACTICE') return correct * 1;
@@ -276,6 +284,14 @@ export default function QuizPlay(): React.ReactElement {
 
             {/* Detailed Statistics */}
             <div style={styles.statsRow}>
+              {/* 난이도 */}
+              <div style={styles.statLeftBox}>
+                <span style={styles.statBoxLabel}>난이도:</span>
+                <span style={styles.statBoxValue}>{validData?.difficultyLabel} {getDifficultyEmoji(validData?.difficultyLabel)}</span>
+              </div>
+
+              <div style={styles.statDivider} />
+
               <div style={styles.statItem}>
                 <span style={{ ...styles.statValue, color: '#34d399' }}>{correctCount}</span>
                 <span style={styles.statLabel}>정답</span>
@@ -289,6 +305,14 @@ export default function QuizPlay(): React.ReactElement {
               <div style={styles.statItem}>
                 <span style={{ ...styles.statValue, color: '#a78bfa' }}>{accuracy}%</span>
                 <span style={styles.statLabel}>정확도</span>
+              </div>
+
+              <div style={styles.statDivider} />
+
+              {/* 시간 */}
+              <div style={styles.statRightBox}>
+                <span style={styles.statBoxLabel}>시간:</span>
+                <span style={styles.statTimeValue}>{formatTime(elapsed)}</span>
               </div>
             </div>
 
@@ -698,11 +722,43 @@ const styles: Record<string, CSSProperties> = {
   scoreSuffix: { fontSize: '1.2rem', color: '#a5b4fc', fontWeight: '600' },
   statsRow: {
     display: 'flex', alignItems: 'center', gap: '1rem',
-    padding: '0.75rem 1.5rem',
+    padding: '0.75rem 1.25rem',
     background: 'rgba(255,255,255,0.04)',
     border: '1px solid rgba(255,255,255,0.07)',
     borderRadius: '12px', width: '100%',
     justifyContent: 'center',
+  },
+  statLeftBox: {
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: '0.85rem',
+    whiteSpace: 'nowrap',
+  },
+  statRightBox: {
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: '0.85rem',
+    whiteSpace: 'nowrap',
+  },
+  statBoxLabel: {
+    color: '#64748b',
+    fontWeight: '600',
+    marginRight: '6px',
+  },
+  statBoxValue: {
+    color: '#cbd5e1',
+    fontWeight: '700',
+  },
+  statTimeValue: {
+    color: '#cbd5e1',
+    fontWeight: '700',
+    background: 'rgba(0, 0, 0, 0.35)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    padding: '6px 14px',
+    borderRadius: '8px',
+    fontFamily: "'Courier New', Courier, monospace",
+    fontSize: '1.05rem',
+    letterSpacing: '0.02em',
   },
   statItem: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' },
   statValue: { fontSize: '1.4rem', fontWeight: '800' },
