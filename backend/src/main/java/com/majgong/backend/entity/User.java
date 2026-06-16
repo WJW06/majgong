@@ -39,13 +39,17 @@ public class User {
 
     @Column(nullable = true)
     @Builder.Default
-    private int loginFailCount = 0;
+    private Integer loginFailCount = 0;
 
     @Column(nullable = true)
     private java.time.LocalDateTime lockTime;
 
+    public int getLoginFailCount() {
+        return this.loginFailCount == null ? 0 : this.loginFailCount;
+    }
+
     public void incrementLoginFailCount() {
-        this.loginFailCount++;
+        this.loginFailCount = getLoginFailCount() + 1;
     }
 
     public void resetLoginFailCount() {
