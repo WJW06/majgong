@@ -31,7 +31,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString());
 
         // Redirect back to frontend
-        String targetUrl = "https://majgong-frontend.vercel.app/oauth2/callback";
+        String targetUrl = "https://majgong.vercel.app/oauth2/callback";
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
